@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="http://minifiedjs.com/download/minified.js" type="text/javascript" charset="utf-8"></script>
+    <!-- <link rel="stylesheet" href="default.css" type="text/css" media="screen"> -->
+  </head>
+  <body>
+    <form id="myForm" onsubmit="return submitForm();" accept-charset="utf-8">
+      <label for="City">City</label>
+      <select name="city">
+        <option value="newyork" selected>New York</option> 
+        <option value="paris" >Paris</option>
+      </select>
+      <label for="Feature">Feature</label>
+      <select name="feature">
+        <option value="frequent" selected>Category: Frequent</option> 
+        <option value="distinctive" >Category: Distinctive</option>
+      </select>
+      <label for="Value">Value</label>
+      <select name="value">
+        <option value="food" selected>Food</option> 
+        <option value="theater" >Theater</option>
+      </select>
+      <button type="submit">See</button>
+    </form>
+    <img id="result_showed" src="images/newyork_frequent_food.jpg" />
+  </body>
+  <script type="text/javascript" charset="utf-8">
+    var MINI = require('minified');
+    var _=MINI._, $=MINI.$, $$=MINI.$$, EE=MINI.EE, HTML=MINI.HTML;
+    function submitForm() {
+      var query = $('#myForm').values();
+      var img_src = _.format('images/{{city}}_{{feature}}_{{value}}.jpg', query);
+      $('#result_showed')[0].src = img_src;
+      return false;
+    }
+$(function() {
+	// PUT YOUR CODE HERE
+});
+  </script>
+</html>
+
