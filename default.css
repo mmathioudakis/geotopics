@@ -1,0 +1,53 @@
+body {
+	margin:0;
+	padding:0;
+	color: #333;
+	background-color: #fcf8fc;
+}
+#map {
+	position:absolute;
+	top:0;
+	width:50%;
+	height:60%
+}
+#panel {
+	position:absolute;
+	left:50%;
+	width:50%;
+	height:35em;
+}
+#neighborhoods {
+	position:absolute;
+	top:60%;
+	left:0;
+	width:50%;
+}
+#neighborhoods ul {
+	text-decoration: underline;
+	cursor: pointer;
+	-webkit-column-count: 4;
+	list-style: none;
+}
+div.bar {
+	display: inline-block;
+	width: 20px;
+	height: 75px;
+	/* We'll override this later */
+	background-color: teal;
+	margin-right: 2px;
+}
+svg#bars {
+	width: 100%;
+	height: 90%;
+}
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 12px;
+}
