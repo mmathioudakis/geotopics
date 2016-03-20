@@ -22,6 +22,11 @@ body {
 	left:0;
 	width:50%;
 }
+#toggle_cat_bar,
+#toggle_time_bar {
+    text-decoration: underline;
+    cursor: pointer;
+}
 #neighborhoods ul {
 	text-decoration: underline;
 	cursor: pointer;

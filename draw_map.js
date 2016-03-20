@@ -32,8 +32,13 @@ function set_x_axis(svg, x, y, axis) {
     .style("text-anchor", "end");
 }
 
-function draw_bars(svg, dataset, className, y_pos, h, margin, xscale, labels,
+function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
   colors, rel_data) {
+  var nb_clicks = 0;
+  var data = [full_data, rel_data],
+    change_prompt = ['Relative', 'Absolute'],
+    label_format = ['.1%', '.1f'];
+  var dataset = data[nb_clicks];
   var bars = svg.selectAll("." + className)
     .data(dataset)
     .enter()
@@ -41,7 +46,7 @@ function draw_bars(svg, dataset, className, y_pos, h, margin, xscale, labels,
     .attr('class', className);
   var yscale = d3.scale.linear()
     .domain([0, d3.max(dataset)])
-    .rangeRound([h, 0])
+    .rangeRound([h, margin.t])
     .nice();
   bars.append("rect")
     .attr("x", function (d, i) {
@@ -58,7 +63,7 @@ function draw_bars(svg, dataset, className, y_pos, h, margin, xscale, labels,
       return h - yscale(d);
     });
   bars.append("text").text(function (d) {
-      return d3.format(".1%")(d)
+      return d3.format(label_format[nb_clicks])(d)
     })
     .attr("x", function (d, i) {
       return xscale(labels[i]) + xscale.rangeBand() / 2;
@@ -75,21 +80,23 @@ function draw_bars(svg, dataset, className, y_pos, h, margin, xscale, labels,
   svg.append("g")
     .attr("class", "axis")
     .attr("id", className)
-    .attr("transform", "translate(" + (y_pos + margin.l / 2) + "," + margin.t +
-      ")")
+    .attr("transform", "translate(" + (y_pos + margin.l / 2) + "," + "0" + ")")
     .call(yAxis);
   svg.append("text")
     .attr("x", y_pos + 2 * margin.l)
     .attr('y', margin.t)
-    .text('Click me')
+    .attr('id', 'toggle_' + className)
+    .text(change_prompt[nb_clicks])
     .on('click', function () {
+      nb_clicks = (nb_clicks + 1) % 2;
+      dataset = data[nb_clicks]
       yscale = d3.scale.linear()
-        .domain([0, d3.max(rel_data)])
-        .rangeRound([h, 0])
+        .domain([0, d3.max(dataset)])
+        .rangeRound([h, margin.t])
         .nice();
       yAxis = d3.svg.axis().scale(yscale).orient("left").ticks(5);
       svg.selectAll('.' + className + ' rect')
-        .data(rel_data)
+        .data(dataset)
         .transition()
         .attr("y", function (d) {
           return yscale(d);
@@ -98,15 +105,17 @@ function draw_bars(svg, dataset, className, y_pos, h, margin, xscale, labels,
           return h - yscale(d);
         });
       svg.selectAll('.' + className + ' text')
-        .data(rel_data)
+        .data(dataset)
         .transition()
         .attr("y", function (d) {
           return yscale(d) - 5;
         })
         .text(function (d) {
-          return d3.format(".1%")(d)
+          return d3.format(label_format[nb_clicks])(d)
         });
-      svg.select('#' + className).call(yAxis);
+      svg.select('#' + className).transition().call(yAxis);
+      svg.select('#toggle_' + className).transition().text(change_prompt[
+        nb_clicks]);
     });
 }
 
@@ -117,7 +126,7 @@ function display_region(feature) {
   var svg = d3.select('#bars');
   var bounding_rect = svg.node().getBoundingClientRect();
   var margin = {
-      t: 10,
+      t: 30,
       r: 30,
       b: 100,
       l: 60
@@ -152,34 +161,39 @@ function display_region(feature) {
   draw_bars(svg, feature.properties.category_distrib, 'cat_bar', 0, h,
     margin, xScale_cat, mainCats, colors_cat, feature.properties.category_more
   );
-  // draw_bars(svg, feature.properties.category_more, 'cat_bar', 0, h, margin, xScale_cat, mainCats, colors_cat);
   draw_bars(svg, feature.properties.time_distrib, 'time_bar', bounding_rect.width /
     2, h,
     margin, xScale_time, timeOfDay, colors_time, feature.properties.time_more
   );
+  // TODO: display two sentences highlighting most frequent category and timeOfDay?
 }
 
 function main() {
-  // var map = create_map([40.8, -74], 13)
-  $.request('get', 'newyork_formatted.json', {})
+  // TODO: allow for loading of different city
+  var map = create_map([40.8, -74], 13);
+  // TODO: fix min and max level of zoom
+  $.request('get', 'newyork_distrib.json', {})
     .then(function success(result) {
       var regions = $.parseJSON(result);
       var list_elems = new Array();
       for (let feature of regions.features) {
         var name = feature.properties.name;
-        display_region(feature);
-        return false;
         list_elems.push(EE('li', {}, name).on('click', display_region, [
           feature
         ]));
       }
       $('#neighborhoods').add(EE('ul', {}, list_elems));
+      // TODO add region one by one and keep a reference to them for
+      // highlighting them in a different color when hovering over link list
+      // TODO fitbound to all region (see illalla and http://leafletjs.com/reference.html#map-fitbounds)
       L.geoJson(regions, {
         style: function (feature) {
           return {
             color: '#222',
+            // TODO choose a single transparent color a priori
             fillColor: feature.properties.fill,
-            weight: 3,
+            weight: 2,
+            // TODO so to set opacity higher (for border)
             opacity: 0.3
           };
         }
