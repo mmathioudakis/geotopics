@@ -16,7 +16,7 @@ var allRegions = [];
 function create_map(center, zoom_level) {
   L.mapbox.accessToken =
     'pk.eyJ1IjoiZGF1cmVnIiwiYSI6ImNpbGF4aTkwZTAwM3l2d2x6bGNsd3JhOWkifQ.ga2zNgyopN05cNJ1tbviWQ';
-  return L.mapbox.map('map', 'mapbox.light');//.setView(center, zoom_level);
+  return L.mapbox.map('map', 'mapbox.light'); //.setView(center, zoom_level);
 }
 
 function set_x_axis(svg, x, y, axis) {
@@ -145,8 +145,7 @@ function display_region(feature) {
     .orient("bottom");
   // https://github.com/mbostock/d3/blob/master/lib/colorbrewer/colorbrewer.js
   var colors_time = function (i) {
-    return ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404"]
-      [i];
+    return ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404"][i];
   }
   var xScale_time = d3.scale.ordinal()
     .domain(timeOfDay)
@@ -168,19 +167,33 @@ function display_region(feature) {
   );
   // TODO: display two sentences highlighting most frequent category and timeOfDay?
 }
+
 function region_in(index) {
   var poly = allRegions[index];
   var Lpoly = poly._layers[Object.keys(poly._layers)[0]];
   Lpoly.bringToFront();
-  Lpoly.setStyle({fillColor: "#47b8e0", opacity: 1.0});
+  Lpoly.setStyle({
+    fillColor: "#47b8e0",
+    opacity: 1.0
+  });
 }
+
 function region_out(index) {
   var poly = allRegions[index];
   var Lpoly = poly._layers[Object.keys(poly._layers)[0]];
   Lpoly.bringToBack();
-  Lpoly.setStyle({fillColor: "rgba(255,201,82, 0.5)", opacity: 0.7});
+  Lpoly.setStyle({
+    fillColor: "rgba(255,201,82, 0.5)",
+    opacity: 0.7
+  });
 }
-var POLY_STYLE = { color: '#222', fillColor: 'rgba(255,201,82, 0.5)', weight: 2, opacity: 0.7};
+var POLY_STYLE = {
+  color: '#222',
+  fillColor: 'rgba(255,201,82, 0.5)',
+  weight: 2,
+  opacity: 0.7
+};
+
 function main() {
   // TODO: allow for loading of different city
   var map = create_map();
@@ -193,14 +206,20 @@ function main() {
       var i = 0;
       for (let feature of regions.features) {
         var name = feature.properties.name;
-        var poly = L.geoJson(feature, {style: POLY_STYLE});
+        var poly = L.geoJson(feature, {
+          style: POLY_STYLE
+        });
         allRegions.push(poly);
         poly.addTo(map);
-        if (BOUNDS) {BOUNDS.extend(poly.getBounds());}
-        else {BOUNDS = poly.getBounds();}
+        if (BOUNDS) {
+          BOUNDS.extend(poly.getBounds());
+        } else {
+          BOUNDS = poly.getBounds();
+        }
+        feature.poly_index = i;
         list_elems.push(EE('li', {}, name).on('click', display_region, [feature])
-            .on('mouseover', region_in, [i])
-            .on('mouseout', region_out, [i]))
+          .on('mouseover', region_in, [i])
+          .on('mouseout', region_out, [i]))
         i = i + 1;
       }
       $('#neighborhoods').add(EE('ul', {}, list_elems));
