@@ -11,12 +11,12 @@ var mainCats = ['Arts &\n Entertainment', 'College & University', 'Food',
 var timeOfDay = ['morning', 'noon', 'afternoon', 'evening', 'night',
   'late night'
 ];
+var allRegions = [];
 
 function create_map(center, zoom_level) {
   L.mapbox.accessToken =
     'pk.eyJ1IjoiZGF1cmVnIiwiYSI6ImNpbGF4aTkwZTAwM3l2d2x6bGNsd3JhOWkifQ.ga2zNgyopN05cNJ1tbviWQ';
-  return L.mapbox.map('map', 'mapbox.light').setView(center, zoom_level);
-
+  return L.mapbox.map('map', 'mapbox.light');//.setView(center, zoom_level);
 }
 
 function set_x_axis(svg, x, y, axis) {
@@ -68,6 +68,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     .attr("x", function (d, i) {
       return xscale(labels[i]) + xscale.rangeBand() / 2;
     })
+    // TODO put text below with appropriate color http://stackoverflow.com/a/3943023
     .attr("y", function (d) {
       return yscale(d) - 5;
     })
@@ -167,37 +168,45 @@ function display_region(feature) {
   );
   // TODO: display two sentences highlighting most frequent category and timeOfDay?
 }
-
+function region_in(index) {
+  var poly = allRegions[index];
+  var Lpoly = poly._layers[Object.keys(poly._layers)[0]];
+  Lpoly.bringToFront();
+  Lpoly.setStyle({fillColor: "#47b8e0", opacity: 1.0});
+}
+function region_out(index) {
+  var poly = allRegions[index];
+  var Lpoly = poly._layers[Object.keys(poly._layers)[0]];
+  Lpoly.bringToBack();
+  Lpoly.setStyle({fillColor: "rgba(255,201,82, 0.5)", opacity: 0.7});
+}
+var POLY_STYLE = { color: '#222', fillColor: 'rgba(255,201,82, 0.5)', weight: 2, opacity: 0.7};
 function main() {
   // TODO: allow for loading of different city
-  var map = create_map([40.8, -74], 13);
+  var map = create_map();
   // TODO: fix min and max level of zoom
   $.request('get', 'newyork_distrib.json', {})
     .then(function success(result) {
       var regions = $.parseJSON(result);
       var list_elems = new Array();
+      var BOUNDS = null;
+      var i = 0;
       for (let feature of regions.features) {
         var name = feature.properties.name;
-        list_elems.push(EE('li', {}, name).on('click', display_region, [
-          feature
-        ]));
+        var poly = L.geoJson(feature, {style: POLY_STYLE});
+        allRegions.push(poly);
+        poly.addTo(map);
+        if (BOUNDS) {BOUNDS.extend(poly.getBounds());}
+        else {BOUNDS = poly.getBounds();}
+        list_elems.push(EE('li', {}, name).on('click', display_region, [feature])
+            .on('mouseover', region_in, [i])
+            .on('mouseout', region_out, [i]))
+        i = i + 1;
       }
       $('#neighborhoods').add(EE('ul', {}, list_elems));
-      // TODO add region one by one and keep a reference to them for
-      // highlighting them in a different color when hovering over link list
-      // TODO fitbound to all region (see illalla and http://leafletjs.com/reference.html#map-fitbounds)
-      L.geoJson(regions, {
-        style: function (feature) {
-          return {
-            color: '#222',
-            // TODO choose a single transparent color a priori
-            fillColor: feature.properties.fill,
-            weight: 2,
-            // TODO so to set opacity higher (for border)
-            opacity: 0.3
-          };
-        }
-      }).addTo(map);
+      map.fitBounds(BOUNDS);
+      map.setMaxBounds(BOUNDS.pad(.50));
+      // map.fitBounds(BOUNDS, {maxZoom: map.getZoom()+2});
     })
 }
 $.ready(main);
