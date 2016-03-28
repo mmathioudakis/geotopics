@@ -7,20 +7,20 @@ body {
 #map {
 	position:absolute;
 	top:0;
-	width:50%;
-	height:60%
+	width:60%;
+	height:75%
 }
 #panel {
 	position:absolute;
-	left:50%;
-	width:50%;
-	height:35em;
+	left:60.5%;
+	width:39.5%;
+	height:99%;
 }
 #neighborhoods {
 	position:absolute;
-	top:60%;
+	top:75%;
 	left:0;
-	width:50%;
+	width:60%;
 }
 #toggle_cat_bar,
 #toggle_time_bar {
@@ -30,20 +30,16 @@ body {
 #neighborhoods ul {
 	text-decoration: underline;
 	cursor: pointer;
-	-webkit-column-count: 4;
+	-webkit-column-count: 5;
+	-moz-column-count: 5;
 	list-style: none;
 }
-div.bar {
-	display: inline-block;
-	width: 20px;
-	height: 75px;
-	/* We'll override this later */
-	background-color: teal;
-	margin-right: 2px;
+#region-title {
+    text-align:center;
 }
 svg#bars {
 	width: 100%;
-	height: 90%;
+	height: 94%;
 }
 .axis path,
 .axis line {

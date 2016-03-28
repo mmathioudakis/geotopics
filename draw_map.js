@@ -33,7 +33,7 @@ function set_x_axis(svg, x, y, axis) {
 }
 
 function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
-  colors, rel_data) {
+  colors, rel_data, upper) {
   var nb_clicks = 0;
   var data = [full_data, rel_data],
     change_prompt = ['Relative', 'Absolute'],
@@ -44,9 +44,11 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     .enter()
     .append("g")
     .attr('class', className);
+
+  var horiz_space = upper ? [h / 2 - margin.b, margin.t] : [h - margin.b, h / 2 + margin.t]
   var yscale = d3.scale.linear()
     .domain([0, d3.max(dataset)])
-    .rangeRound([h, margin.t])
+    .rangeRound(horiz_space)
     .nice();
   bars.append("rect")
     .attr("x", function (d, i) {
@@ -60,7 +62,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
       return colors(i);
     })
     .attr("height", function (d) {
-      return h - yscale(d);
+      return yscale(0) - yscale(d);
     });
   bars.append("text").text(function (d) {
       return d3.format(label_format[nb_clicks])(d)
@@ -85,7 +87,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     .call(yAxis);
   svg.append("text")
     .attr("x", y_pos + 2 * margin.l)
-    .attr('y', margin.t)
+    .attr('y', horiz_space[1])
     .attr('id', 'toggle_' + className)
     .text(change_prompt[nb_clicks])
     .on('click', function () {
@@ -93,7 +95,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
       dataset = data[nb_clicks]
       yscale = d3.scale.linear()
         .domain([0, d3.max(dataset)])
-        .rangeRound([h, margin.t])
+        .rangeRound(horiz_space)
         .nice();
       yAxis = d3.svg.axis().scale(yscale).orient("left").ticks(5);
       svg.selectAll('.' + className + ' rect')
@@ -103,7 +105,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
           return yscale(d);
         })
         .attr("height", function (d) {
-          return h - yscale(d);
+          return yscale(0) - yscale(d);
         });
       svg.selectAll('.' + className + ' text')
         .data(dataset)
@@ -134,12 +136,13 @@ function display_region(feature) {
     },
     w = bounding_rect.width - margin.l - margin.r,
     h = bounding_rect.height - margin.t - margin.b;
+  var height = bounding_rect.height;
   svg.selectAll("*").remove();
 
   var colors_cat = d3.scale.category10();
   var xScale_cat = d3.scale.ordinal()
     .domain(mainCats)
-    .rangeRoundBands([margin.l, bounding_rect.width / 2 - margin.r], 0.15, 0.2);
+    .rangeRoundBands([margin.l, bounding_rect.width - margin.r], 0.15, 0.2);
   var xAxis_cat = d3.svg.axis()
     .scale(xScale_cat)
     .orient("bottom");
@@ -149,21 +152,18 @@ function display_region(feature) {
   }
   var xScale_time = d3.scale.ordinal()
     .domain(timeOfDay)
-    .rangeRoundBands([bounding_rect.width / 2 + margin.l, bounding_rect.width -
-      margin.r
-    ], 0.15, 0.2);
+    .rangeRoundBands([margin.l, bounding_rect.width - margin.r], 0.15, 0.2);
   var xAxis_time = d3.svg.axis()
     .scale(xScale_time)
     .orient("bottom");
-  set_x_axis(svg, 0, h, xAxis_cat);
-  set_x_axis(svg, 0, h, xAxis_time);
+  set_x_axis(svg, 0, height / 2 - margin.b + 5, xAxis_cat);
+  set_x_axis(svg, 0, height - margin.b + 5, xAxis_time);
 
-  draw_bars(svg, feature.properties.category_distrib, 'cat_bar', 0, h,
-    margin, xScale_cat, mainCats, colors_cat, feature.properties.category_more
+  draw_bars(svg, feature.properties.category_distrib, 'cat_bar', 20, height,
+    margin, xScale_cat, mainCats, colors_cat, feature.properties.category_more, true
   );
-  draw_bars(svg, feature.properties.time_distrib, 'time_bar', bounding_rect.width /
-    2, h,
-    margin, xScale_time, timeOfDay, colors_time, feature.properties.time_more
+  draw_bars(svg, feature.properties.time_distrib, 'time_bar', 20, height,
+    margin, xScale_time, timeOfDay, colors_time, feature.properties.time_more, false
   );
   // TODO: display two sentences highlighting most frequent category and timeOfDay?
 }
