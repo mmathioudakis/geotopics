@@ -127,6 +127,7 @@ function display_region(feature) {
   $('#region-title').fill(name);
 
   var svg = d3.select('#bars');
+  svg.selectAll("*").remove();
   var bounding_rect = svg.node().getBoundingClientRect();
   var margin = {
       t: 30,
@@ -137,7 +138,6 @@ function display_region(feature) {
     w = bounding_rect.width - margin.l - margin.r,
     h = bounding_rect.height - margin.t - margin.b;
   var height = bounding_rect.height;
-  svg.selectAll("*").remove();
 
   var colors_cat = d3.scale.category10();
   var xScale_cat = d3.scale.ordinal()
@@ -193,12 +193,18 @@ var POLY_STYLE = {
   weight: 2,
   opacity: 0.7
 };
+var map = null;
 
-function main() {
-  // TODO: allow for loading of different city
-  var map = create_map();
-  // TODO: fix min and max level of zoom
-  $.request('get', 'newyork_distrib.json', {})
+function change_city() {
+  $('#region-title').fill('');
+  var svg = d3.select('#bars');
+  svg.selectAll("*").remove();
+  d3.select('#neighborhoods').selectAll("*").remove();
+  allRegions.length = 0;
+  main(document.getElementById("city").value);
+}
+function main(city) {
+  $.request('get', 'regions/'+city+'_distrib.json', {})
     .then(function success(result) {
       var regions = $.parseJSON(result);
       var list_elems = new Array();
@@ -224,8 +230,10 @@ function main() {
       }
       $('#neighborhoods').add(EE('ul', {}, list_elems));
       map.fitBounds(BOUNDS);
-      map.setMaxBounds(BOUNDS.pad(.50));
-      // map.fitBounds(BOUNDS, {maxZoom: map.getZoom()+2});
+      map.setMaxBounds(BOUNDS.pad(.3));
     })
 }
-$.ready(main);
+$.ready(function() {
+  map = create_map();
+  main('amsterdam');
+});
