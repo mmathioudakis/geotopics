@@ -1,3 +1,15 @@
+var urlParams;
+(window.onpopstate = function () {
+    var match,
+    pl     = /\+/g,  // Regex for replacing addition symbol with a space
+    search = /([^&=]+)=?([^&]*)/g,
+    decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+    query  = window.location.search.substring(1);
+    urlParams = {};
+    while (match = search.exec(query))
+        urlParams[decode(match[1])] = decode(match[2]);
+})();
+var max_region = urlParams.max_region ? parseInt(urlParams.max_region) : 30;
 var MINI = require('minified');
 var _ = MINI._,
   $ = MINI.$,
@@ -227,6 +239,9 @@ function main(city) {
           .on('mouseover', region_in, [i])
           .on('mouseout', region_out, [i]))
         i = i + 1;
+        if (i > max_region) {
+          break;
+        }
       }
       $('#neighborhoods').add(EE('ul', {}, list_elems));
       map.fitBounds(BOUNDS);
