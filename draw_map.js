@@ -215,10 +215,23 @@ function change_city() {
   allRegions.length = 0;
   main(document.getElementById("city").value);
 }
+function onEachFeature(feature, layer) {
+  layer.bindLabel(feature.properties.title);
+}
+function styleMe(feature) {
+  return {weight: 0, fillOpacity: 0.8, fillColor: feature.properties.fill};
+}
 function main(city) {
   $.request('get', 'regions/'+city+'_distrib.json', {})
+  // $.request('get', 'regions/'+city+'_cat_distinct.json', {})
     .then(function success(result) {
       var regions = $.parseJSON(result);
+      /*
+      var layer = L.geoJson(regions, {onEachFeature: onEachFeature, style: styleMe});
+      map.fitBounds(layer.getBounds());
+      layer.addTo(map);
+      return ;
+      */
       var list_elems = new Array();
       var BOUNDS = null;
       var i = 0;
