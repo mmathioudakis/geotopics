@@ -1,26 +1,63 @@
 body {
-	margin:0;
+	position: absolute;
+	top: 0%;
+	left: 0%;
+	width: 100%;
 	padding:0;
 	color: #333;
 	background-color: #fcf8fc;
 }
+#title{
+	position: absolute;
+	width: 100%;
+	top: 0px;
+	/*height: 5%;*/
+	font-size: 200%;
+	font-weight: bold;
+}
+#main-left{
+	position: absolute;
+	left: 0%;
+	height: 500px;
+	top:60px;
+	width:49%;
+}
+#main-right{
+	position: absolute;
+	left: 50%;
+	height: 500px;
+	top:60px;
+	width:49%;
+}
 #map {
 	position:absolute;
-	top:0;
-	width:60%;
-	height:75%
+	width:95%;
+	height:100%;
 }
 #panel {
-	position:absolute;
-	left:60.5%;
-	width:39.5%;
-	height:99%;
+	position:static;
+	/*left:1%;*/
+	top: 30px;
+	width:60%;
+	/*height:4%;*/
+	/*font-size: : 100%;*/
+}
+#region-title {
+	position: static;
+	top: 0px;
+	margin: 0px;
+	padding: 0px;
+	height: 20px;
+	left:0%;
+	width:100%;	
+    text-align:left;
 }
 #neighborhoods {
-	position:absolute;
-	top:75%;
-	left:0;
-	width:60%;
+	position:static;
+	top:20px;
+	height: 140px;
+	left:0%;
+	width:100%;
 }
 #toggle_cat_bar,
 #toggle_time_bar {
@@ -34,12 +71,12 @@ body {
 	-moz-column-count: 5;
 	list-style: none;
 }
-#region-title {
-    text-align:center;
-}
 svg#bars {
+	position: absolute;
+	top:160px;
+	height:400px;
 	width: 100%;
-	height: 94%;
+	/*height: 94%;*/
 }
 .axis path,
 .axis line {

@@ -15,52 +15,61 @@
 <link href='default.css' rel='stylesheet' />
 </head>
 <body>
-<div id='map'></div>
-<div id='panel'>
-<select name="city" id="city" onchange="change_city();" size="1">
-    <option value="amsterdam">Amsterdam</option>
-    <option value="ankara">Ankara</option>
-    <option value="antalya">Antalya</option>
-    <option value="atlanta">Atlanta</option>
-    <option value="barcelona">Barcelona</option>
-    <option value="belohorizonte">Belo Horizonte</option>
-    <option value="berlin">Berlin</option>
-    <option value="chicago">Chicago</option>
-    <option value="fortaleza">Fortaleza</option>
-    <option value="helsinki">Helsinki</option>
-    <option value="houston-k59">Houston</option>
-    <option value="indianapolis">Indianapolis</option>
-    <option value="istanbul-k59">Istanbul</option>
-    <option value="izmir">Izmir</option>
-    <option value="kualalumpur">Kuala Lumpur</option>
-    <option value="london">London</option>
-    <option value="losangeles">Los Angeles</option>
-    <option value="mexicocity">Mexico City</option>
-    <option value="moscow">Moscow</option>
-    <option value="newyork">New York</option>
-    <option value="paris">Paris</option>
-    <option value="portoalegre">Porto Alegre</option>
-    <option value="prague">Prague</option>
-    <option value="recife">Recife</option>
-    <option value="riodejaneiro">Rio De Janeiro</option>
-    <option value="rome">Rome</option>
-    <option value="salvador-k59">Salvador</option>
-    <option value="sandiego">San Diego</option>
-    <option value="sanfrancisco">San Francisco</option>
-    <option value="santiagodechile">Santiago De Chile</option>
-    <option value="saopaulo">Sao Paulo</option>
-    <option value="seattle">Seattle</option>
-    <option value="seoul">Seoul</option>
-    <option value="singapore">Singapore</option>
-    <option value="stlouis">St. Louis</option>
-    <option value="stockholm">Stockholm</option>
-    <option value="stpetersburg">St. Petersburg</option>
-    <option value="tokyo">Tokyo</option>
-    <option value="washington">Washington</option>
-    <option value="yokohama">Yokohama</option>
-</select>
-    <h2 id='region-title'></h2><svg id='bars'></svg></div>
-<div id='neighborhoods'></div>
-<script src="draw_map.js" type="text/javascript" charset="utf-8"></script>
+    <div id='title'>
+        GeoTopics: Exploring the Traces of Urban Activity
+    </div>
+    <div id='main-left'>
+        <div id='map'></div>
+    </div>
+    <div id='main-right'>
+        <div id='panel'> <span style = "font-size: 125%"> Choose your city: </span> 
+            <select name="city" id="city" onchange="change_city();" size="1">
+                <option value="amsterdam">Amsterdam</option>
+                <option value="ankara">Ankara</option>
+                <option value="antalya">Antalya</option>
+                <option value="atlanta">Atlanta</option>
+                <option value="barcelona">Barcelona</option>
+                <option value="belohorizonte">Belo Horizonte</option>
+                <option value="berlin">Berlin</option>
+                <option value="chicago">Chicago</option>
+                <option value="fortaleza">Fortaleza</option>
+                <option value="helsinki">Helsinki</option>
+                <option value="houston-k59">Houston</option>
+                <option value="indianapolis">Indianapolis</option>
+                <option value="istanbul-k59">Istanbul</option>
+                <option value="izmir">Izmir</option>
+                <option value="kualalumpur">Kuala Lumpur</option>
+                <option value="london">London</option>
+                <option value="losangeles">Los Angeles</option>
+                <option value="mexicocity">Mexico City</option>
+                <option value="moscow">Moscow</option>
+                <option value="newyork">New York</option>
+                <option value="paris">Paris</option>
+                <option value="portoalegre">Porto Alegre</option>
+                <option value="prague">Prague</option>
+                <option value="recife">Recife</option>
+                <option value="riodejaneiro">Rio De Janeiro</option>
+                <option value="rome">Rome</option>
+                <option value="salvador-k59">Salvador</option>
+                <option value="sandiego">San Diego</option>
+                <option value="sanfrancisco">San Francisco</option>
+                <option value="santiagodechile">Santiago De Chile</option>
+                <option value="saopaulo">Sao Paulo</option>
+                <option value="seattle">Seattle</option>
+                <option value="seoul">Seoul</option>
+                <option value="singapore">Singapore</option>
+                <option value="stlouis">St. Louis</option>
+                <option value="stockholm">Stockholm</option>
+                <option value="stpetersburg">St. Petersburg</option>
+                <option value="tokyo">Tokyo</option>
+                <option value="washington">Washington</option>
+                <option value="yokohama">Yokohama</option>
+            </select>
+        </div>
+        <div id='region-title' style = "font-weight: bold">Regions</div>
+        <div id='neighborhoods'></div>
+        <svg id='bars'></svg>
+    </div>
+    <script src="draw_map.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>
