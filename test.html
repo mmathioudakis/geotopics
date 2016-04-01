@@ -3,43 +3,54 @@
   <head>
     <meta charset="utf-8">
     <title>Demo</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
     <script src="http://minifiedjs.com/download/minified.js" type="text/javascript" charset="utf-8"></script>
-    <!-- <link rel="stylesheet" href="default.css" type="text/css" media="screen"> -->
+    <!-- <script src="https://d3js.org/d3.v3.min.js" charset="utf&#45;8"></script> -->
+    <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
+    <link href='default.css' rel='stylesheet' />
   </head>
   <body>
     <form id="myForm" onsubmit="return submitForm();" accept-charset="utf-8">
       <label for="City">City</label>
       <select name="city">
-        <option value="newyork" selected>New York</option> 
-        <option value="paris" >Paris</option>
+        <option value="paris" selected>Paris</option>
       </select>
       <label for="Feature">Feature</label>
       <select name="feature">
-        <option value="frequent" selected>Category: Frequent</option> 
-        <option value="distinctive" >Category: Distinctive</option>
+        <option value="cat_likely" selected>Category: Most likely</option> 
+        <option value="cat_distinct">Category: Distinctive</option>
+        <option value="time_likely">Time of Day: Most likely</option> 
+        <option value="time_distinct">Time of Day: Distinctive</option>
       </select>
+      <!--
       <label for="Value">Value</label>
       <select name="value">
         <option value="food" selected>Food</option> 
         <option value="theater" >Theater</option>
       </select>
+      -->
       <button type="submit">See</button>
     </form>
-    <img id="result_showed" src="images/newyork_frequent_food.jpg" />
-  </body>
+    <!-- <img id="result_showed" src="images/newyork_frequent_food.jpg" /> -->
+    <div id='main-left'>
+        <div id='map'></div>
+    </div>
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.css' rel='stylesheet' />
+    <script src="draw_map.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
     var MINI = require('minified');
     var _=MINI._, $=MINI.$, $$=MINI.$$, EE=MINI.EE, HTML=MINI.HTML;
     function submitForm() {
       var query = $('#myForm').values();
-      var img_src = _.format('images/{{city}}_{{feature}}_{{value}}.jpg', query);
-      $('#result_showed')[0].src = img_src;
+      var parts = query.feature.split('_');
+      show_heatmap(query.city, parts[0], parts[1]);
       return false;
     }
-$(function() {
-	// PUT YOUR CODE HERE
+$.ready(function() {
+  show_heatmap('paris', 'cat', 'likely');
 });
   </script>
+  </body>
 </html>
-

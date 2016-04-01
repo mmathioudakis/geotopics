@@ -221,17 +221,21 @@ function onEachFeature(feature, layer) {
 function styleMe(feature) {
   return {weight: 0, fillOpacity: 0.8, fillColor: feature.properties.fill};
 }
-function main(city) {
-  $.request('get', 'regions/'+city+'_distrib.json', {})
-  // $.request('get', 'regions/'+city+'_cat_distinct.json', {})
+function show_heatmap(city, cat_or_time, likely_or_distinct) {
+  if (map === null) {map = create_map();}
+  $.request('get', 'regions/'+city+'_'+cat_or_time+'_'+likely_or_distinct+'.json', {})
     .then(function success(result) {
       var regions = $.parseJSON(result);
-      /*
       var layer = L.geoJson(regions, {onEachFeature: onEachFeature, style: styleMe});
       map.fitBounds(layer.getBounds());
       layer.addTo(map);
-      return ;
-      */
+    })
+}
+function show_regions(city) {
+  if (map === null) {map = create_map();}
+  $.request('get', 'regions/'+city+'_distrib.json', {})
+    .then(function success(result) {
+      var regions = $.parseJSON(result);
       var list_elems = new Array();
       var BOUNDS = null;
       var i = 0;
@@ -261,7 +265,3 @@ function main(city) {
       map.setMaxBounds(BOUNDS.pad(.3));
     })
 }
-$.ready(function() {
-  map = create_map();
-  main('amsterdam');
-});
