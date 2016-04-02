@@ -231,8 +231,12 @@ function show_heatmap(city, cat_or_time, likely_or_distinct) {
       layer.addTo(map);
     })
 }
+var zoomLevel = null;
 function show_regions(city) {
-  if (map === null) {map = create_map();}
+  if (map === null) {
+    map = create_map();
+    map.on('zoomend', function zoomEnded() {zoomLevel = map.getZoom();});
+  }
   $.request('get', 'regions/'+city+'_distrib.json', {})
     .then(function success(result) {
       var regions = $.parseJSON(result);
@@ -263,5 +267,37 @@ function show_regions(city) {
       $('#neighborhoods').add(EE('ul', {}, list_elems));
       map.fitBounds(BOUNDS);
       map.setMaxBounds(BOUNDS.pad(.3));
-    })
+      zoomLevel = map.getZoom();
+    });
+  if (city === 'paris') { show_venues(city);}
 }
+function show_venues(city) {
+  $.request('get', 'regions/'+city+'_venues_compact.json', {})
+    .then(canvas_display);
+}
+
+// Plotting venues
+function canvas_display(result) {
+    var venues = $.parseJSON(result).venues;
+    var points = [];
+    _.each(venues, function add_venue(venue) {
+        var d = {"slat": venue[1], "slon": venue[0]};
+        points.push(d);
+    });
+    var venue_dots = new MyLayer();
+    venue_dots.setData(points);
+    console.log(points.length);
+    console.log(points[0]);
+    map.addLayer(venue_dots);
+}
+var radius_at_zoom_level = {10: 1, 11: 1, 12: 1,
+  13: 1.2, 14: 1.4, 15: 1.8, 16: 2.3, 17: 2.4, 18: 2.5,
+19: 2.5, 20: 2.5, 21: 2.5, 22: 2.5};
+var MyLayer = L.FullCanvas.extend({
+    drawSource: function(point, ctx) {
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(33, 33, 33, .82)";
+        ctx.arc(point.x, point.y , radius_at_zoom_level[zoomLevel], 0, 2 * Math.PI, true);
+        ctx.fill();
+    }
+});
