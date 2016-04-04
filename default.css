@@ -18,14 +18,14 @@ body {
 #main-left{
 	position: absolute;
 	left: 0%;
-	height: 500px;
+	height: 800px;
 	top:60px;
 	width:49%;
 }
 #main-right{
 	position: absolute;
 	left: 50%;
-	height: 500px;
+	height: 800px;
 	top:60px;
 	width:49%;
 }

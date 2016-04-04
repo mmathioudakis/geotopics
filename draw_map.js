@@ -10,12 +10,12 @@ var urlParams;
         urlParams[decode(match[1])] = decode(match[2]);
 })();
 var max_region = urlParams.max_region ? parseInt(urlParams.max_region) : 30;
+
+// loading minified
+// see http://minifiedjs.com/docs/quickstart.html
 var MINI = require('minified');
-var _ = MINI._,
-  $ = MINI.$,
-  $$ = MINI.$$,
-  EE = MINI.EE,
-  HTML = MINI.HTML;
+var _ = MINI._, $ = MINI.$, $$ = MINI.$$, EE = MINI.EE, HTML = MINI.HTML;
+
 var mainCats = ['Arts &\n Entertainment', 'College & University', 'Food',
   'Nightlife Spot', 'Outdoors & Recreation', 'Shop & Service',
   'Professional & Other Places', 'Residence', 'Travel & Transport'
@@ -231,7 +231,9 @@ function show_heatmap(city, cat_or_time, likely_or_distinct) {
       layer.addTo(map);
     })
 }
+
 var zoomLevel = null;
+
 function show_regions(city) {
   if (map === null) {
     map = create_map();
@@ -256,7 +258,7 @@ function show_regions(city) {
           BOUNDS = poly.getBounds();
         }
         feature.poly_index = i;
-        list_elems.push(EE('li', {}, name).on('click', display_region, [feature])
+        list_elems.push(EE('option', {}, name).on('click', display_region, [feature])
           .on('mouseover', region_in, [i])
           .on('mouseout', region_out, [i]))
         i = i + 1;
@@ -264,13 +266,14 @@ function show_regions(city) {
           break;
         }
       }
-      $('#neighborhoods').add(EE('ul', {}, list_elems));
+      $('#neighborhoods').add(EE('select', {}, list_elems));
       map.fitBounds(BOUNDS);
       map.setMaxBounds(BOUNDS.pad(.3));
       zoomLevel = map.getZoom();
     });
   if (city === 'paris') { show_venues(city);}
 }
+
 function show_venues(city) {
   $.request('get', 'regions/'+city+'_venues_compact.json', {})
     .then(canvas_display);
