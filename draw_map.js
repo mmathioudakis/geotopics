@@ -97,6 +97,8 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     .attr("id", className)
     .attr("transform", "translate(" + (y_pos + margin.l / 2) + "," + "0" + ")")
     .call(yAxis);
+  // TODO instead of appending to SVG, we could add the select element from
+  // there and still link to that change function
   svg.append("text")
     .attr("x", y_pos + 2 * margin.l)
     .attr('y', horiz_space[1])
@@ -213,12 +215,11 @@ var POLY_STYLE = {
 var map = null;
 
 function change_city() {
-  $('#region-title').fill('');
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
   d3.select('#neighborhoods').selectAll("*").remove();
   allRegions.length = 0;
-  main(document.getElementById("city").value);
+  show_regions(document.getElementById("city").value);
 }
 function onEachFeature(feature, layer) {
   layer.bindLabel(feature.properties.title);
@@ -272,7 +273,7 @@ function show_regions(city) {
           break;
         }
       }
-      $('#neighborhoods').add(EE('select', {}, list_elems));
+      $('#neighborhoods').fill(EE('select', {}, list_elems));
       map.fitBounds(BOUNDS);
       map.setMaxBounds(BOUNDS.pad(.3));
       zoomLevel = map.getZoom();
