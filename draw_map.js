@@ -136,7 +136,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
 
 function display_region(feature) {
   var name = feature.properties.name;
-  $('#region-title').fill(name);
+  // $('#region-title').fill(name);
 
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
