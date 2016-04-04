@@ -134,6 +134,11 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     });
 }
 
+function remove_region() {
+  var svg = d3.select('#bars');
+  svg.selectAll("*").remove();
+}
+
 function display_region(feature) {
   var name = feature.properties.name;
   // $('#region-title').fill(name);
@@ -243,6 +248,7 @@ function show_regions(city) {
     .then(function success(result) {
       var regions = $.parseJSON(result);
       var list_elems = new Array();
+      list_elems.push(EE('option', {}, "--None--").on('click', remove_region))
       var BOUNDS = null;
       var i = 0;
       for (let feature of regions.features) {
