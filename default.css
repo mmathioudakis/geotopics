@@ -1,17 +1,12 @@
 body {
-	position: absolute;
-	top: 0%;
-	left: 0%;
-	width: 100%;
 	padding:0;
 	color: #333;
 	background-color: #fcf8fc;
 }
 #title{
 	position: absolute;
-	width: 100%;
+	width: 99%;
 	top: 0px;
-	/*height: 5%;*/
 	font-size: 200%;
 	font-weight: bold;
 }
@@ -21,6 +16,7 @@ body {
 	height: 800px;
 	top:60px;
 	width:49%;
+	padding-left: 10px;
 }
 #main-right{
 	position: absolute;
@@ -31,26 +27,8 @@ body {
 }
 #map {
 	position:absolute;
-	width:95%;
+	width:98%;
 	height:100%;
-}
-#panel {
-	position:static;
-	/*left:1%;*/
-	top: 30px;
-	width:60%;
-	/*height:4%;*/
-	/*font-size: : 100%;*/
-}
-#region-title {
-	position: static;
-	top: 0px;
-	margin: 0px;
-	padding: 0px;
-	height: 20px;
-	left:0%;
-	width:100%;	
-    text-align:left;
 }
 #neighborhoods {
 	position:static;
@@ -72,11 +50,8 @@ body {
 	list-style: none;
 }
 svg#bars {
-	position: absolute;
-	top:160px;
-	height:400px;
 	width: 100%;
-	/*height: 94%;*/
+	height: 94%;
 }
 .axis path,
 .axis line {
@@ -88,4 +63,10 @@ svg#bars {
 .axis text {
     font-family: sans-serif;
     font-size: 12px;
+}
+label {
+    font-size: 125%;
+}
+#main-right div {
+    margin: .2rem auto;
 }

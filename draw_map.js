@@ -273,7 +273,7 @@ function show_regions(city) {
           break;
         }
       }
-      $('#neighborhoods').fill(EE('select', {}, list_elems));
+      $('#neighborhoods').fill(EE('select', {"id": "neighborhoods_select"}, list_elems));
       map.fitBounds(BOUNDS);
       map.setMaxBounds(BOUNDS.pad(.3));
       zoomLevel = map.getZoom();

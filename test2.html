@@ -20,7 +20,7 @@
         <div id='map'></div>
     </div>
     <div id='main-right'>
-        <div id='panel'> <span style = "font-size: 125%"> Choose your city: </span> 
+        <div id='panel'> <label for="city">Choose your city:</label> 
             <select name="city" id="city" onchange="change_city();" size="1">
                 <option value="amsterdam">Amsterdam</option>
                 <option value="ankara">Ankara</option>
@@ -64,13 +64,13 @@
                 <option value="yokohama">Yokohama</option>
             </select>
         </div>
-        <div id='region-title'>
-            <span style = "font-size: 125%">Choose a region: </span>
+        <div>
+            <label for="neighborhoods_select">Choose a region: </label>
             <span id='neighborhoods'></span>
         </div>
         <div>
-            <span style = "font-size: 125%">Choose how to represent your values.</span>
-            <select id = 'rel_or_abs'>
+            <label for="rel_or_abs">Choose how to represent your values:</label>
+            <select id="rel_or_abs">
                 <option value=0>Absolute</option>
                 <option value=1>Relative</option>
             </select>
