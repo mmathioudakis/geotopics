@@ -228,6 +228,7 @@ function styleMe(feature) {
   return {weight: 0, fillOpacity: 0.8, fillColor: feature.properties.fill};
 }
 
+var overlay_info = {city: null, url: null, layer: null};
 function show_heatmap(city, cat_or_time, likely_or_distinct) {
   if (map === null) {map = create_map();}
   var raw_bounds = CITY_BOUNDS[city];
@@ -239,7 +240,21 @@ function show_heatmap(city, cat_or_time, likely_or_distinct) {
   var feature_str = (cat_or_time == 'cat'? 'primCategory': (cat_or_time == 'time'? 'timeOfDay': 'dayOfWeek'))
   var score_type = (likely_or_distinct == 'likely'? 'likely': 'distinctive')
   var imageURL = 'overlays/' + city + '_' + feature_str + '_' + score_type + '_main.png';
-  var overlay = L.imageOverlay(imageURL, imageBounds).addTo(map);
+  if (overlay_info.city === null) {
+    overlay_info.city = city;
+    overlay_info.url = imageURL;
+    overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
+    map.addLayer(overlay_info.layer);
+  }
+  if (overlay_info.city !== null && overlay_info.city !== city) {
+    map.removeLayer(overlay_info.layer);
+    overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
+    map.addLayer(overlay_info.layer);
+  }
+  if (overlay_info.url !== null && overlay_info.url !== imageURL) {
+    overlay_info.layer.setUrl(imageURL);
+  }
+  console.log(overlay_info);
 }
 
 var zoomLevel = null;
