@@ -227,34 +227,19 @@ function onEachFeature(feature, layer) {
 function styleMe(feature) {
   return {weight: 0, fillOpacity: 0.8, fillColor: feature.properties.fill};
 }
-// function show_heatmap(city, cat_or_time, likely_or_distinct) {
-//   if (map === null) {map = create_map();}
-//   $.request('get', 'regions/'+city+'_'+cat_or_time+'_'+likely_or_distinct+'.json', {})
-//     .then(function success(result) {
-//       var regions = $.parseJSON(result);
-//       var layer = L.geoJson(regions, {onEachFeature: onEachFeature, style: styleMe});
-//       map.fitBounds(layer.getBounds());
-//       layer.addTo(map);
-//     })
-// }
+
 function show_heatmap(city, cat_or_time, likely_or_distinct) {
   if (map === null) {map = create_map();}
-  $.request('get', 'regions/'+city+'_'+cat_or_time+'_'+likely_or_distinct+'.json', {})
-    .then(function success(result) {
-      var regions = $.parseJSON(result);
-      // TODO avoid loading the entire json-file-thing into the layer,
-      // just have a js file with the bounds for each city
-      var layer = L.geoJson(regions, {onEachFeature: onEachFeature, style: styleMe});
-      var imageBounds = layer.getBounds();
-      map.fitBounds(layer.getBounds());
-      // layer.addTo(map);
-      // TODO use consistent keywords for features
-      var feature_str = (cat_or_time == 'cat'? 'primCategory': (cat_or_time == 'time'? 'timeOfDay': 'dayOfWeek'))
-      var score_type = (likely_or_distinct == 'likely'? 'likely': 'distinctive')
-      var imageURL = 'overlays/' + city + '_' + feature_str + '_' + score_type + '_main.png';
-      console.log("trying to load image: " + imageURL);
-      var overlay = L.imageOverlay(imageURL, imageBounds).addTo(map);
-    })
+  var raw_bounds = CITY_BOUNDS[city];
+  var southWest = L.latLng(raw_bounds[0][1], raw_bounds[0][0]),
+    northEast = L.latLng(raw_bounds[1][1], raw_bounds[1][0]),
+    imageBounds = L.latLngBounds(southWest, northEast);
+  map.fitBounds(imageBounds);
+  // TODO use consistent keywords for features
+  var feature_str = (cat_or_time == 'cat'? 'primCategory': (cat_or_time == 'time'? 'timeOfDay': 'dayOfWeek'))
+  var score_type = (likely_or_distinct == 'likely'? 'likely': 'distinctive')
+  var imageURL = 'overlays/' + city + '_' + feature_str + '_' + score_type + '_main.png';
+  var overlay = L.imageOverlay(imageURL, imageBounds).addTo(map);
 }
 
 var zoomLevel = null;
