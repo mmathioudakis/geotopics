@@ -201,10 +201,7 @@ function region_out(index) {
   var poly = allRegions[index];
   var Lpoly = poly._layers[Object.keys(poly._layers)[0]];
   Lpoly.bringToBack();
-  Lpoly.setStyle({
-    fillColor: "rgba(255,201,82, 0.5)",
-    opacity: 0.7
-  });
+  Lpoly.setStyle(POLY_STYLE);
 }
 var POLY_STYLE = {
   color: '#222',
@@ -258,6 +255,9 @@ function show_heatmap(city, cat_or_time, likely_or_distinct) {
 }
 
 var zoomLevel = null;
+var regions_layer = null;
+var venues_layer = null;
+var control_added = false;
 
 function show_regions(city) {
   if (map === null) {
@@ -277,7 +277,6 @@ function show_regions(city) {
           style: POLY_STYLE
         });
         allRegions.push(poly);
-        poly.addTo(map);
         if (BOUNDS) {
           BOUNDS.extend(poly.getBounds());
         } else {
@@ -292,22 +291,30 @@ function show_regions(city) {
           break;
         }
       }
+      regions_layer = L.layerGroup(allRegions);
       $('#neighborhoods').fill(EE('select', {"id": "neighborhoods_select"}, list_elems));
+      map.addLayer(regions_layer);
       map.fitBounds(BOUNDS);
       map.setMaxBounds(BOUNDS.pad(.3));
       zoomLevel = map.getZoom();
+      maybe_add_control();
     });
   if (city === 'paris') { show_venues(city);}
 }
-
+function maybe_add_control() {
+  if (venues_layer !== null && regions_layer !== null && control_added === false) {
+    L.control.layers(null, {"Regions": regions_layer, "Venues": venues_layer}).addTo(map);
+    control_added = true;
+  }
+}
 function show_venues(city) {
   $.request('get', 'regions/'+city+'_venues_compact.json', {})
-    .then(canvas_display);
+    .then(create_venues_canvas);
 }
 
 // Plotting venues
 var lscale = null;
-function canvas_display(result) {
+function create_venues_canvas(result) {
     var venues = $.parseJSON(result).venues;
     var points = [];
     var max_visits = -1;
@@ -322,9 +329,10 @@ function canvas_display(result) {
         points.push(d);
     });
     lscale = d3.scale.log().base(Math.E).domain([5, max_visits]).range([1, 3]).nice();
-    var venue_dots = new MyLayer();
-    venue_dots.setData(points);
-    map.addLayer(venue_dots);
+    venues_layer = new MyLayer();
+    venues_layer.setData(points);
+    map.addLayer(venues_layer);
+    maybe_add_control();
 }
 var radius_factor = d3.scale.threshold().domain([0, 10, 13, 15, 17]).range([0, .1, .3, .6, .8, 1.2]);
 var MyLayer = L.FullCanvas.extend({
