@@ -240,7 +240,8 @@ function show_heatmap(city, cat_or_time, likely_or_distinct) {
   // TODO use consistent keywords for features
   var feature_str = (cat_or_time == 'cat'? 'primCategory': (cat_or_time == 'time'? 'timeOfDay': 'dayOfWeek'))
   var score_type = (likely_or_distinct == 'likely'? 'likely': 'distinctive')
-  var imageURL = 'overlays/' + city + '_' + feature_str + '_' + score_type + '_main.png';
+  var infix =  city + '_' + feature_str + '_' + score_type;
+  var imageURL = 'overlays/' + infix + '_main.png';
   if (overlay_info.city === null) {
     overlay_info.city = city;
     overlay_info.url = imageURL;
@@ -255,9 +256,24 @@ function show_heatmap(city, cat_or_time, likely_or_distinct) {
   if (overlay_info.url !== null && overlay_info.url !== imageURL) {
     overlay_info.layer.setUrl(imageURL);
   }
-  console.log(overlay_info);
+  $.request('get', 'overlays/legends/'+infix+'_main.json', {})
+    .then(display_legend);
 }
-
+function display_legend(result) {
+  var raw = $.parseJSON(result);
+  var data = [];
+  for (var cat in raw) {
+    data.push({"name": cat, "color": d3.rgb(raw[cat][0]*255, raw[cat][1]*255, raw[cat][2]*255).toString()});
+  }
+  var legend = d3.select('#legend');
+  var li = legend.selectAll('li')
+    .data(data)
+    .enter()
+    .append('li');
+  li.append('div')
+    .style("background-color", function (d) {return d.color;});
+  li.append('span').text(function (d) {return d.name;});
+}
 var zoomLevel = null;
 var regions_layer = null;
 var venues_layer = null;
