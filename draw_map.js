@@ -216,6 +216,10 @@ function change_city() {
   svg.selectAll("*").remove();
   d3.select('#neighborhoods').selectAll("*").remove();
   allRegions.length = 0;
+  map.removeControl(control_layer);
+  control_layer = null;
+  venues_layer = null;
+  regions_layer = null;
   show_regions(document.getElementById("city").value);
 }
 function onEachFeature(feature, layer) {
@@ -257,7 +261,7 @@ function show_heatmap(city, cat_or_time, likely_or_distinct) {
 var zoomLevel = null;
 var regions_layer = null;
 var venues_layer = null;
-var control_added = false;
+var control_layer = null;
 
 function show_regions(city) {
   if (map === null) {
@@ -299,12 +303,12 @@ function show_regions(city) {
       zoomLevel = map.getZoom();
       maybe_add_control();
     });
-  if (city === 'paris') { show_venues(city);}
+  show_venues(city);
 }
 function maybe_add_control() {
-  if (venues_layer !== null && regions_layer !== null && control_added === false) {
-    L.control.layers(null, {"Regions": regions_layer, "Venues": venues_layer}).addTo(map);
-    control_added = true;
+  if (venues_layer !== null && regions_layer !== null && control_layer === null) {
+    control_layer = L.control.layers(null, {"Regions": regions_layer, "Venues": venues_layer});
+    map.addControl(control_layer);
   }
 }
 function show_venues(city) {
