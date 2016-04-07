@@ -28,7 +28,7 @@ var allRegions = [];
 function create_map(center, zoom_level) {
   L.mapbox.accessToken =
     'pk.eyJ1IjoiZGF1cmVnIiwiYSI6ImNpbGF4aTkwZTAwM3l2d2x6bGNsd3JhOWkifQ.ga2zNgyopN05cNJ1tbviWQ';
-  return L.mapbox.map('map', 'mapbox.light'); //.setView(center, zoom_level);
+  return L.mapbox.map('map', 'mapbox.light', {maxZoom: 19});
 }
 
 function set_x_axis(svg, x, y, axis) {
@@ -306,27 +306,39 @@ function show_venues(city) {
 }
 
 // Plotting venues
+var lscale = null;
 function canvas_display(result) {
     var venues = $.parseJSON(result).venues;
     var points = [];
+    var max_visits = -1;
     _.each(venues, function add_venue(venue) {
-        var d = {"slat": venue[1], "slon": venue[0]};
+        if (venue[2] < 5) {
+          return;
+        }
+        if (venue[2] > max_visits) {
+          max_visits = venue[2];
+        }
+        var d = {"slat": venue[1], "slon": venue[0], "count": venue[2]};
         points.push(d);
     });
+    lscale = d3.scale.log().base(Math.E).domain([5, max_visits]).range([1, 3]).nice();
     var venue_dots = new MyLayer();
     venue_dots.setData(points);
-    console.log(points.length);
-    console.log(points[0]);
     map.addLayer(venue_dots);
 }
-var radius_at_zoom_level = {10: 1, 11: 1, 12: 1,
-  13: 1.2, 14: 1.4, 15: 1.8, 16: 2.3, 17: 2.4, 18: 2.5,
-19: 2.5, 20: 2.5, 21: 2.5, 22: 2.5};
+var radius_factor = d3.scale.threshold().domain([0, 10, 13, 15, 17]).range([0, .1, .3, .6, .8, 1.2]);
 var MyLayer = L.FullCanvas.extend({
-    drawSource: function(point, ctx) {
+    drawSource: function(point, ctx, data) {
         ctx.beginPath();
-        ctx.fillStyle = "rgba(33, 33, 33, .82)";
-        ctx.arc(point.x, point.y , radius_at_zoom_level[zoomLevel], 0, 2 * Math.PI, true);
+        var radius = lscale(data.count);
+        var color = "rgba(33, 33, 33, .82)";
+        if (radius > 2) {
+          color = "rgba(229, 57, 53, 0.82)"
+        }
+        ctx.fillStyle = color;
+        if (radius*radius_factor(zoomLevel) >= 0.6) {
+          ctx.arc(point.x, point.y , 1.5*radius*radius_factor(zoomLevel), 0, 2 * Math.PI, true);
+        }
         ctx.fill();
     }
 });
