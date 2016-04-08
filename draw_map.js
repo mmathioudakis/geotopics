@@ -72,11 +72,13 @@ function resize_map(e) {
   var raw = CITY_BOUNDS[chosen_city];
   $("#city").set({value: chosen_city});
   $('#main-left').set({$width: '55%'});
+  $('#main-right').set({$display: 'block'});
   $('#map').set({$height: '80%'});
   map.invalidateSize();
   //TODO this left the popup though, maybe better to set it to null as well
   map.removeLayer(initial_city_markers);
   map.fitBounds([[raw[0][1], raw[0][0]], [raw[1][1], raw[1][0]]], {maxZoom: 18});
+  change_city(chosen_city);
 }
 
 function set_x_axis(svg, x, y, axis) {
@@ -87,7 +89,7 @@ function set_x_axis(svg, x, y, axis) {
     .selectAll("text")
     .attr("y", 0)
     .attr("x", -10)
-    .attr("dy", ".4rem")
+    .attr("dy", 5)
     .attr("transform", "rotate(-45)")
     .style("text-anchor", "end");
 }
@@ -97,7 +99,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
   var nb_clicks = 0;
   var data = [full_data, rel_data],
     change_prompt = ['Relative', 'Absolute'],
-    label_format = ['.1%', '.1f'];
+    label_format = ['.1%', '.2f'];
   var dataset = data[nb_clicks];
   var bars = svg.selectAll("." + className)
     .data(dataset)
@@ -148,8 +150,8 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
   // TODO instead of appending to SVG, we could add the select element from
   // there and still link to that change function
   svg.append("text")
-    .attr("x", y_pos + 2 * margin.l)
-    .attr('y', horiz_space[1])
+    .attr("x", y_pos)
+    .attr('y', horiz_space[1]-margin.t/3)
     .attr('id', 'toggle_' + className)
     .text(change_prompt[nb_clicks])
     .on('click', function () {
@@ -207,6 +209,9 @@ function display_region(feature) {
   var height = bounding_rect.height;
 
   var colors_cat = d3.scale.category10();
+  var colors_cat = function (i) {
+    return ['#f44336', '#2196f3', '#8bc34a', '#9c27b0', '#ff9800', '#795548', '#ffeb3b', '#ff4081', '#1de9b6'][i];
+  }
   var xScale_cat = d3.scale.ordinal()
     .domain(mainCats)
     .rangeRoundBands([margin.l, bounding_rect.width - margin.r], 0.15, 0.2);
@@ -258,16 +263,16 @@ var POLY_STYLE = {
   opacity: 0.7
 };
 
-function change_city() {
+function change_city(city) {
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
   d3.select('#neighborhoods').selectAll("*").remove();
   allRegions.length = 0;
-  map.removeControl(control_layer);
+  if (control_layer !== null) {map.removeControl(control_layer);}
   control_layer = null;
   venues_layer = null;
   regions_layer = null;
-  show_regions(document.getElementById("city").value);
+  show_regions(city);
 }
 function onEachFeature(feature, layer) {
   layer.bindLabel(feature.properties.title);
@@ -332,7 +337,6 @@ function show_heatmap(city, cat_or_time, likely_or_distinct, fval) {
   } else {
     var imageURL = infix + '_' + fval + '.png';
     imageURL = 'overlays/' + imageURL.replace(' ', '').replace("/", "+");
-    console.log('Trying ' + imageURL);
     if (overlay_info.city === null) {
         overlay_info.city = city;
         overlay_info.url = imageURL;
@@ -378,7 +382,7 @@ function show_regions(city) {
     .then(function success(result) {
       var regions = $.parseJSON(result);
       var list_elems = new Array();
-      list_elems.push(EE('option', {}, "--None--").on('click', remove_region))
+      list_elems.push(EE('option', {}, "some region").on('click', remove_region))
       var BOUNDS = null;
       var i = 0;
       for (let feature of regions.features) {

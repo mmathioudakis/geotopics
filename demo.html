@@ -13,6 +13,7 @@
     <div id='title'>
         <label for="city">GeoTopics: Exploring the Traces of Urban Activity in </label> 
         <select autofocus name="city" id="city" onchange="resize_map(null);" size="1">
+            <option value="null" selected>some city</option>
             <option id="o_amsterdam" value="amsterdam">Amsterdam</option>
             <option id="o_ankara" value="ankara">Ankara</option>
             <option id="o_antalya" value="antalya">Antalya</option>
@@ -33,7 +34,7 @@
             <option id="o_mexicocity" value="mexicocity">Mexico City</option>
             <option id="o_moscow" value="moscow">Moscow</option>
             <option id="o_newyork" value="newyork">New York</option>
-            <option id="o_paris" value="paris">Paris</option>
+            <option class="meaningful" id="o_paris" value="paris">Paris</option>
             <option id="o_portoalegre" value="portoalegre">Porto Alegre</option>
             <option id="o_prague" value="prague">Prague</option>
             <option id="o_recife" value="recife">Recife</option>
@@ -58,6 +59,13 @@
     <div id='main-left'>
         <div id='map'></div>
         <ul id='legend'></ul>
+    </div>
+    <div id='main-right'>
+        <form>
+        <label for="neighborhoods_select">Explore: </label>
+        <span id='neighborhoods'></span>
+        </form>
+        <svg id='bars'></svg>
     </div>
 </body>
     <script src="draw_map.js" type="text/javascript" charset="utf-8"></script>
