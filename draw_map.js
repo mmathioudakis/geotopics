@@ -241,10 +241,18 @@ function show_heatmap(city, cat_or_time, likely_or_distinct) {
       // layer.addTo(map);
       // TODO use consistent keywords for features
       var feature_str = (cat_or_time == 'cat'? 'primCategory': (cat_or_time == 'time'? 'timeOfDay': 'dayOfWeek'))
-      var score_type = (likely_or_distinct == 'likely'? 'likely': 'distinctive')
+      var score_type = (likely_or_distinct == 'likely'? 'likely': 'distinctive');
       var imageURL = 'overlays/' + city + '_' + feature_str + '_' + score_type + '_main.png';
       console.log("trying to load image: " + imageURL);
       var overlay = L.imageOverlay(imageURL, imageBounds).addTo(map);
+      var legendURL = 'overlays/legends/' + city + '_' + feature_str + '_' + score_type + '_main.json';
+      console.log("trying to load json: " + legendURL);
+      $.request('get', legendURL, {})
+        .then(function success(json)) {
+          var legend = $.parseJSON(legendURL);
+          console.log("loaded legend:  from " + legendURL);
+        };
+      
     })
 }
 
