@@ -265,6 +265,7 @@ function display_legend(result) {
   for (var cat in raw) {
     data.push({"name": cat, "color": d3.rgb(raw[cat][0]*255, raw[cat][1]*255, raw[cat][2]*255).toString()});
   }
+  d3.select('#legend').selectAll("li").remove();
   var legend = d3.select('#legend');
   var li = legend.selectAll('li')
     .data(data)
