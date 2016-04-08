@@ -24,6 +24,14 @@ var timeOfDay = ['morning', 'noon', 'afternoon', 'evening', 'night',
   'late night'
 ];
 var allRegions = [];
+var zoomLevel = null;
+var regions_layer = null;
+var venues_layer = null;
+var control_layer = null;
+var lscale = null;
+var overlay_info = {city: null, url: null, layer: null};
+var map = null;
+var radius_factor = d3.scale.threshold().domain([0, 10, 13, 15, 17]).range([0, .1, .3, .6, .8, 1.2]);
 
 function create_map(center, zoom_level) {
   L.mapbox.accessToken =
@@ -209,7 +217,6 @@ var POLY_STYLE = {
   weight: 2,
   opacity: 0.7
 };
-var map = null;
 
 function change_city() {
   var svg = d3.select('#bars');
@@ -229,7 +236,6 @@ function styleMe(feature) {
   return {weight: 0, fillOpacity: 0.8, fillColor: feature.properties.fill};
 }
 
-var overlay_info = {city: null, url: null, layer: null};
 function show_heatmap(city, cat_or_time, likely_or_distinct) {
   if (map === null) {map = create_map();}
   var raw_bounds = CITY_BOUNDS[city];
@@ -275,10 +281,6 @@ function display_legend(result) {
     .style("background-color", function (d) {return d.color;});
   li.append('span').text(function (d) {return d.name;});
 }
-var zoomLevel = null;
-var regions_layer = null;
-var venues_layer = null;
-var control_layer = null;
 
 function show_regions(city) {
   if (map === null) {
@@ -334,7 +336,6 @@ function show_venues(city) {
 }
 
 // Plotting venues
-var lscale = null;
 function create_venues_canvas(result) {
     var venues = $.parseJSON(result).venues;
     var points = [];
@@ -355,7 +356,6 @@ function create_venues_canvas(result) {
     map.addLayer(venues_layer);
     maybe_add_control();
 }
-var radius_factor = d3.scale.threshold().domain([0, 10, 13, 15, 17]).range([0, .1, .3, .6, .8, 1.2]);
 var MyLayer = L.FullCanvas.extend({
     drawSource: function(point, ctx, data) {
         ctx.beginPath();
