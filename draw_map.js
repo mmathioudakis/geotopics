@@ -33,10 +33,50 @@ var overlay_info = {city: null, url: null, layer: null};
 var map = null;
 var radius_factor = d3.scale.threshold().domain([0, 10, 13, 15, 17]).range([0, .1, .3, .6, .8, 1.2]);
 
-function create_map(center, zoom_level) {
+function create_map() {
   L.mapbox.accessToken =
     'pk.eyJ1IjoiZGF1cmVnIiwiYSI6ImNpbGF4aTkwZTAwM3l2d2x6bGNsd3JhOWkifQ.ga2zNgyopN05cNJ1tbviWQ';
   return L.mapbox.map('map', 'mapbox.light', {maxZoom: 19});
+}
+
+var initial_city_markers = null;
+var popups = {};
+function init() {
+  map = create_map();
+  var minx = 200, miny = 200, maxx = -200, maxy = -200;
+  var markers = [];
+  for (var city in CITY_BOUNDS) {
+    var name = CITY_BOUNDS[city][2];
+    var x = (CITY_BOUNDS[city][0][1] + CITY_BOUNDS[city][1][1])/2;
+    var y = (CITY_BOUNDS[city][0][0] + CITY_BOUNDS[city][1][0])/2;
+    if (x < minx) {minx = x;}
+    if (y < miny) {miny = y;}
+    if (x > maxx) {maxx = x;}
+    if (y > maxy) {maxy = y;}
+    var marker = L.marker([x, y], {keyboard: false, title: name});
+    var popup = L.popup({autoPan: false}).setLatLng([x, y]).setContent('<h3 class="city">'+name+'</h3>');
+    marker.bindPopup(popup);
+    popups[city] = popup;
+    $('#o_'+city).on('mouseover', function(e){popups[e.target.value].openOn(map);});
+    $('#o_'+city).on('mouseout', function(e){map.closePopup(popups[e.target.value]);});
+    marker.city = city;
+    marker.on('click', resize_map);
+    markers.push(marker);
+  }
+  initial_city_markers = L.layerGroup(markers);
+  initial_city_markers.addTo(map);
+  map.fitBounds([[minx-2, miny-2], [maxx+2, maxy+2]], {maxZoom: 18});
+}
+function resize_map(e) {
+  var chosen_city = e===null ? $('#city').get('value') : e.target.city;
+  var raw = CITY_BOUNDS[chosen_city];
+  $("#city").set({value: chosen_city});
+  $('#main-left').set({$width: '55%'});
+  $('#map').set({$height: '80%'});
+  map.invalidateSize();
+  //TODO this left the popup though, maybe better to set it to null as well
+  map.removeLayer(initial_city_markers);
+  map.fitBounds([[raw[0][1], raw[0][0]], [raw[1][1], raw[1][0]]], {maxZoom: 18});
 }
 
 function set_x_axis(svg, x, y, axis) {
