@@ -13,6 +13,7 @@
     <div id='title'>
         <label for="city">GeoTopics: Exploring the Traces of Urban Activity in </label>
         <select autofocus name="city" id="city" onchange="resize_map(null);" size="1">
+            <!--TODO choose which cities are meaningful (the one with less checkins are boring from a first look, all their regions are the same with no distinctiveness) -->
             <option value="null" selected>some city</option>
             <option id="o_amsterdam" value="amsterdam">Amsterdam</option>
             <option id="o_ankara" value="ankara">Ankara</option>
@@ -77,8 +78,7 @@
             <select onchange="update_overlay_url(false);" id='feature_value' name="feature_value">
             </select>)
             </span>
-            <!-- TODO it looks better with two paragraph but long feature
-                names take too much space
+            <!-- TODO it looks better with two paragraphs but long feature names take too much space
             </p>
             <p>
             -->

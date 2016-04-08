@@ -9,6 +9,7 @@ var urlParams;
     while (match = search.exec(query))
         urlParams[decode(match[1])] = decode(match[2]);
 })();
+// TODO is 18 a good choice?
 var max_region = urlParams.max_region ? parseInt(urlParams.max_region) : 18;
 
 // loading minified
@@ -30,6 +31,7 @@ var venues_layer = null;
 var heatmap_layer = null;
 var control_layer = null;
 var lscale = null;
+// TODO check overlay_info lifecycle (should it be reset sometimes?)
 var overlay_info = {city: null, url: null, layer: null};
 var map = null;
 var radius_factor = d3.scale.threshold().domain([0, 10, 13, 15, 17]).range([0, .1, .3, .6, .8, 1.2]);
@@ -39,7 +41,9 @@ var popups = {};
 function create_map() {
   L.mapbox.accessToken =
     'pk.eyJ1IjoiZGF1cmVnIiwiYSI6ImNpbGF4aTkwZTAwM3l2d2x6bGNsd3JhOWkifQ.ga2zNgyopN05cNJ1tbviWQ';
+  // TODO how come maxZoom option isn't honored?
   map = L.mapbox.map('map', 'mapbox.light', {maxZoom: 19});
+  //TODO do we need a scale?
   // L.control.scale().addTo(map);
   map.on('zoomend', function zoomEnded() {zoomLevel = map.getZoom();});
   control_layer = L.control.layers(null, null);
@@ -79,7 +83,7 @@ function resize_map(e) {
   $('#main-right').set({$display: 'block'});
   $('#map').set({$height: '80%'});
   map.invalidateSize();
-  //TODO this left the popup though, maybe better to set it to null as well
+  //TODO this leave the popups in place, maybe better to set them to null as well?
   map.removeLayer(initial_city_markers);
   map.fitBounds([[raw[0][1], raw[0][0]], [raw[1][1], raw[1][0]]], {maxZoom: 18});
   map.addControl(control_layer);
@@ -138,8 +142,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     .attr("id", className)
     .attr("transform", "translate(" + (y_pos + margin.l / 2) + "," + "0" + ")")
     .call(yAxis);
-  // TODO instead of appending to SVG, we could add the select element from
-  // there and still link to that change function
+  // TODO instead of appending to SVG, we could add the select element from there and still link to that change function
   svg.append("text")
     .attr("x", y_pos)
     .attr('y', horiz_space[1]-margin.t/3)
@@ -168,6 +171,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     });
 }
 
+//TODO more stuff to clean here?
 function remove_region() {
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
@@ -214,7 +218,7 @@ function display_region(feature) {
   draw_bars(svg, feature.properties.time_distrib, 'time_bar', 20, height,
     margin, xScale_time, timeOfDay, colors_time, feature.properties.time_more, false
   );
-  // TODO: display two sentences highlighting most frequent category and timeOfDay?
+  // TODO: display two sentences highlighting most frequent category and timeOfDay? (no more space!)
 }
 
 function region_in(index) {
@@ -237,11 +241,15 @@ var POLY_STYLE = {
   opacity: 0.7
 };
 
+
+//TODO more cleaning?
 function change_city(city) {
+  //TODO call remove_region?
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
   d3.select('#neighborhoods').selectAll("*").remove();
   allRegions.length = 0;
+  // TODO see what happen to control when we change city
   // map.removeControl(control_layer);
   // control_layer = L.control.layers(null, null);
   venues_layer = null;
@@ -298,6 +306,7 @@ function list_feature_values(result) {
   var raw = $.parseJSON(result);
   var list_elems = [EE('option', {}, "a specific value"),];
   for (var cat in raw) {
+    //TODO cut long feature names?
     list_elems.push(EE('option', {value: cat.replace(/\s/g, '')}, cat.toLowerCase()));
   }
   $('#feature_value').fill(list_elems);
@@ -309,6 +318,9 @@ function show_heatmap(city) {
   update_overlay_url(true);
 }
 
+//TODO should “display: none” the legend when heatmap layer is turned off?
+//TODO likewise, maybe call remove_region when regions_layer is turned off?
+//TODO in general, we should probably react more when layers are turned on/off http://leafletjs.com/reference.html#control-layers-overlayadd
 function display_legend(raw) {
   // var raw = $.parseJSON(result);
   var data = [];
@@ -384,6 +396,7 @@ var MyLayer = L.FullCanvas.extend({
         ctx.beginPath();
         var radius = lscale(data.count);
         var color = "rgba(33, 33, 33, .82)";
+        // TODO display is really buggy, but why?
         if (radius > 2) { color = "rgba(229, 57, 53, 0.82)" }
         ctx.fillStyle = color;
         if (radius*radius_factor(zoomLevel) >= 0.6) {
