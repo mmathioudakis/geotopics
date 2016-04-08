@@ -28,7 +28,7 @@ var allRegions = [];
 function create_map(center, zoom_level) {
   L.mapbox.accessToken =
     'pk.eyJ1IjoiZGF1cmVnIiwiYSI6ImNpbGF4aTkwZTAwM3l2d2x6bGNsd3JhOWkifQ.ga2zNgyopN05cNJ1tbviWQ';
-  return L.mapbox.map('map', 'mapbox.light'); //.setView(center, zoom_level);
+  return L.mapbox.map('map', 'mapbox.light', {maxZoom: 19});
 }
 
 function set_x_axis(svg, x, y, axis) {
@@ -201,10 +201,7 @@ function region_out(index) {
   var poly = allRegions[index];
   var Lpoly = poly._layers[Object.keys(poly._layers)[0]];
   Lpoly.bringToBack();
-  Lpoly.setStyle({
-    fillColor: "rgba(255,201,82, 0.5)",
-    opacity: 0.7
-  });
+  Lpoly.setStyle(POLY_STYLE);
 }
 var POLY_STYLE = {
   color: '#222',
@@ -219,6 +216,10 @@ function change_city() {
   svg.selectAll("*").remove();
   d3.select('#neighborhoods').selectAll("*").remove();
   allRegions.length = 0;
+  map.removeControl(control_layer);
+  control_layer = null;
+  venues_layer = null;
+  regions_layer = null;
   show_regions(document.getElementById("city").value);
 }
 function onEachFeature(feature, layer) {
@@ -228,35 +229,55 @@ function styleMe(feature) {
   return {weight: 0, fillOpacity: 0.8, fillColor: feature.properties.fill};
 }
 
+var overlay_info = {city: null, url: null, layer: null};
 function show_heatmap(city, cat_or_time, likely_or_distinct) {
   if (map === null) {map = create_map();}
-  $.request('get', 'regions/'+city+'_'+cat_or_time+'_'+likely_or_distinct+'.json', {})
-    .then(function success(result) {
-      var regions = $.parseJSON(result);
-      // TODO avoid loading the entire json-file-thing into the layer,
-      // just have a js file with the bounds for each city
-      var layer = L.geoJson(regions, {onEachFeature: onEachFeature, style: styleMe});
-      var imageBounds = layer.getBounds();
-      map.fitBounds(layer.getBounds());
-      // layer.addTo(map);
-      // TODO use consistent keywords for features
-      var feature_str = (cat_or_time == 'cat'? 'primCategory': (cat_or_time == 'time'? 'timeOfDay': 'dayOfWeek'))
-      var score_type = (likely_or_distinct == 'likely'? 'likely': 'distinctive');
-      var imageURL = 'overlays/' + city + '_' + feature_str + '_' + score_type + '_main.png';
-      console.log("trying to load image: " + imageURL);
-      var overlay = L.imageOverlay(imageURL, imageBounds).addTo(map);
-      var legendURL = 'overlays/legends/' + city + '_' + feature_str + '_' + score_type + '_main.json';
-      console.log("trying to load json: " + legendURL);
-      $.request('get', legendURL, {})
-        .then(function success(json)) {
-          var legend = $.parseJSON(legendURL);
-          console.log("loaded legend:  from " + legendURL);
-        };
-      
-    })
+  var raw_bounds = CITY_BOUNDS[city];
+  var southWest = L.latLng(raw_bounds[0][1], raw_bounds[0][0]),
+    northEast = L.latLng(raw_bounds[1][1], raw_bounds[1][0]),
+    imageBounds = L.latLngBounds(southWest, northEast);
+  map.fitBounds(imageBounds);
+  // TODO use consistent keywords for features
+  var feature_str = (cat_or_time == 'cat'? 'primCategory': (cat_or_time == 'time'? 'timeOfDay': 'dayOfWeek'))
+  var score_type = (likely_or_distinct == 'likely'? 'likely': 'distinctive')
+  var infix =  city + '_' + feature_str + '_' + score_type;
+  var imageURL = 'overlays/' + infix + '_main.png';
+  if (overlay_info.city === null) {
+    overlay_info.city = city;
+    overlay_info.url = imageURL;
+    overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
+    map.addLayer(overlay_info.layer);
+  }
+  if (overlay_info.city !== null && overlay_info.city !== city) {
+    map.removeLayer(overlay_info.layer);
+    overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
+    map.addLayer(overlay_info.layer);
+  }
+  if (overlay_info.url !== null && overlay_info.url !== imageURL) {
+    overlay_info.layer.setUrl(imageURL);
+  }
+  $.request('get', 'overlays/legends/'+infix+'_main.json', {})
+    .then(display_legend);
 }
-
+function display_legend(result) {
+  var raw = $.parseJSON(result);
+  var data = [];
+  for (var cat in raw) {
+    data.push({"name": cat, "color": d3.rgb(raw[cat][0]*255, raw[cat][1]*255, raw[cat][2]*255).toString()});
+  }
+  var legend = d3.select('#legend');
+  var li = legend.selectAll('li')
+    .data(data)
+    .enter()
+    .append('li');
+  li.append('div')
+    .style("background-color", function (d) {return d.color;});
+  li.append('span').text(function (d) {return d.name;});
+}
 var zoomLevel = null;
+var regions_layer = null;
+var venues_layer = null;
+var control_layer = null;
 
 function show_regions(city) {
   if (map === null) {
@@ -276,7 +297,6 @@ function show_regions(city) {
           style: POLY_STYLE
         });
         allRegions.push(poly);
-        poly.addTo(map);
         if (BOUNDS) {
           BOUNDS.extend(poly.getBounds());
         } else {
@@ -291,41 +311,62 @@ function show_regions(city) {
           break;
         }
       }
+      regions_layer = L.layerGroup(allRegions);
       $('#neighborhoods').fill(EE('select', {"id": "neighborhoods_select"}, list_elems));
+      map.addLayer(regions_layer);
       map.fitBounds(BOUNDS);
       map.setMaxBounds(BOUNDS.pad(.3));
       zoomLevel = map.getZoom();
+      maybe_add_control();
     });
-  if (city === 'paris') { show_venues(city);}
+  show_venues(city);
 }
-
+function maybe_add_control() {
+  if (venues_layer !== null && regions_layer !== null && control_layer === null) {
+    control_layer = L.control.layers(null, {"Regions": regions_layer, "Venues": venues_layer});
+    map.addControl(control_layer);
+  }
+}
 function show_venues(city) {
   $.request('get', 'regions/'+city+'_venues_compact.json', {})
-    .then(canvas_display);
+    .then(create_venues_canvas);
 }
 
 // Plotting venues
-function canvas_display(result) {
+var lscale = null;
+function create_venues_canvas(result) {
     var venues = $.parseJSON(result).venues;
     var points = [];
+    var max_visits = -1;
     _.each(venues, function add_venue(venue) {
-        var d = {"slat": venue[1], "slon": venue[0]};
+        if (venue[2] < 5) {
+          return;
+        }
+        if (venue[2] > max_visits) {
+          max_visits = venue[2];
+        }
+        var d = {"slat": venue[1], "slon": venue[0], "count": venue[2]};
         points.push(d);
     });
-    var venue_dots = new MyLayer();
-    venue_dots.setData(points);
-    console.log(points.length);
-    console.log(points[0]);
-    map.addLayer(venue_dots);
+    lscale = d3.scale.log().base(Math.E).domain([5, max_visits]).range([1, 3]).nice();
+    venues_layer = new MyLayer();
+    venues_layer.setData(points);
+    map.addLayer(venues_layer);
+    maybe_add_control();
 }
-var radius_at_zoom_level = {10: 1, 11: 1, 12: 1,
-  13: 1.2, 14: 1.4, 15: 1.8, 16: 2.3, 17: 2.4, 18: 2.5,
-19: 2.5, 20: 2.5, 21: 2.5, 22: 2.5};
+var radius_factor = d3.scale.threshold().domain([0, 10, 13, 15, 17]).range([0, .1, .3, .6, .8, 1.2]);
 var MyLayer = L.FullCanvas.extend({
-    drawSource: function(point, ctx) {
+    drawSource: function(point, ctx, data) {
         ctx.beginPath();
-        ctx.fillStyle = "rgba(33, 33, 33, .82)";
-        ctx.arc(point.x, point.y , radius_at_zoom_level[zoomLevel], 0, 2 * Math.PI, true);
+        var radius = lscale(data.count);
+        var color = "rgba(33, 33, 33, .82)";
+        if (radius > 2) {
+          color = "rgba(229, 57, 53, 0.82)"
+        }
+        ctx.fillStyle = color;
+        if (radius*radius_factor(zoomLevel) >= 0.6) {
+          ctx.arc(point.x, point.y , 1.5*radius*radius_factor(zoomLevel), 0, 2 * Math.PI, true);
+        }
         ctx.fill();
     }
 });

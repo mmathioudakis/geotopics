@@ -81,7 +81,7 @@ if (typeof(L) !== 'undefined') {
             points.forEach(function(point){
                 var d = point.data;
                 var spoint = me._myMap.latLngToContainerPoint(new L.LatLng(d.slat, d.slon));
-                me.drawSource(spoint, ctx);
+                me.drawSource(spoint, ctx, d);
                 if (d.tlat && d.tlon){
                     var tpoint = me._myMap.latLngToContainerPoint(new L.LatLng(d.tlat, d.tlon));
                     me.drawTarget(tpoint);

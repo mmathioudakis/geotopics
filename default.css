@@ -4,11 +4,12 @@ body {
 	background-color: #fcf8fc;
 }
 #title{
-	position: absolute;
+	/* position: absolute; */
 	width: 99%;
-	top: 0px;
+	/* top: 0px; */
 	font-size: 200%;
 	font-weight: bold;
+	text-align: center;
 }
 #main-left{
 	position: absolute;
@@ -69,4 +70,14 @@ label {
 }
 #main-right div {
     margin: .2rem auto;
+}
+#legend div {
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    margin-right: .4rem;
+    vertical-align: middle;
+}
+#legend {
+    list-style: none;
 }

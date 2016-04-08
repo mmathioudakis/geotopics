@@ -7,7 +7,7 @@
     <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
     <script src="http://minifiedjs.com/download/minified.js" type="text/javascript" charset="utf-8"></script>
     <script src="fullcanvas.js" type="text/javascript" charset="utf-8"></script>
-    <!-- <script src="https://d3js.org/d3.v3.min.js" charset="utf&#45;8"></script> -->
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
     <link href='default.css' rel='stylesheet' />
   </head>
@@ -38,11 +38,11 @@
         <div id='map'></div>
     </div>
     <div id='main-right'>
-      <div id='legend'>
-      </div>
+        <ul id='legend'></ul>
     </div>
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.js'></script>
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.css' rel='stylesheet' />
+    <script src="city_bounds.js" type="text/javascript" charset="utf-8"></script>
     <script src="draw_map.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
     var MINI = require('minified');
