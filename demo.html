@@ -11,7 +11,7 @@
 	</head>
 <body>
     <div id='title'>
-        <label for="city">GeoTopics: Exploring the Traces of Urban Activity in </label> 
+        <label for="city">GeoTopics: Exploring the Traces of Urban Activity in </label>
         <select autofocus name="city" id="city" onchange="resize_map(null);" size="1">
             <option value="null" selected>some city</option>
             <option id="o_amsterdam" value="amsterdam">Amsterdam</option>
@@ -61,9 +61,30 @@
         <ul id='legend'></ul>
     </div>
     <div id='main-right'>
-        <form>
-        <label for="neighborhoods_select">Explore: </label>
-        <span id='neighborhoods'></span><span id="theta"></span>
+        <form id="formui">
+            <p>
+            <label for="feature">See what is the most </label>
+            <select onchange="update_overlay_url(true);" id="feature" name="feature">
+                <option value="cat_likely" selected>likely Category</option>
+                <option value="cat_distinct">distinctive Category</option>
+                <option value="time_likely">likely Time of Day</option>
+                <option value="time_distinct">distinctive Time of Day</option>
+                <option value="day_likely">likely Day of Week</option>
+                <option value="day_distinct">distinctive Day of Week</option>
+            </select>
+            of each cell in the city <span id="focus">(
+                <label for="feature_value">and focus on&nbsp;</label>
+            <select onchange="update_overlay_url(false);" id='feature_value' name="feature_value">
+            </select>)
+            </span>
+            <!-- TODO it looks better with two paragraph but long feature
+                names take too much space
+            </p>
+            <p>
+            -->
+            <label for="neighborhoods_select">Or explore&nbsp;</label>
+            <span id='neighborhoods'></span><span id="theta"></span>
+            </p>
         </form>
         <svg id='bars'></svg>
     </div>
@@ -71,4 +92,3 @@
     <script src="draw_map.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">init();</script>
 </html>
-

@@ -27,6 +27,7 @@ var allRegions = [];
 var zoomLevel = null;
 var regions_layer = null;
 var venues_layer = null;
+var heatmap_layer = null;
 var control_layer = null;
 var lscale = null;
 var overlay_info = {city: null, url: null, layer: null};
@@ -38,12 +39,14 @@ var popups = {};
 function create_map() {
   L.mapbox.accessToken =
     'pk.eyJ1IjoiZGF1cmVnIiwiYSI6ImNpbGF4aTkwZTAwM3l2d2x6bGNsd3JhOWkifQ.ga2zNgyopN05cNJ1tbviWQ';
-  return L.mapbox.map('map', 'mapbox.light', {maxZoom: 19});
+  map = L.mapbox.map('map', 'mapbox.light', {maxZoom: 19});
+  // L.control.scale().addTo(map);
+  map.on('zoomend', function zoomEnded() {zoomLevel = map.getZoom();});
+  control_layer = L.control.layers(null, null);
 }
 
 function init() {
-  map = create_map();
-  map.on('zoomend', function zoomEnded() {zoomLevel = map.getZoom();});
+  create_map();
   var minx = 200, miny = 200, maxx = -200, maxy = -200;
   var markers = [];
   for (var city in CITY_BOUNDS) {
@@ -79,6 +82,7 @@ function resize_map(e) {
   //TODO this left the popup though, maybe better to set it to null as well
   map.removeLayer(initial_city_markers);
   map.fitBounds([[raw[0][1], raw[0][0]], [raw[1][1], raw[1][0]]], {maxZoom: 18});
+  map.addControl(control_layer);
   change_city(chosen_city);
 }
 
@@ -238,89 +242,75 @@ function change_city(city) {
   svg.selectAll("*").remove();
   d3.select('#neighborhoods').selectAll("*").remove();
   allRegions.length = 0;
-  if (control_layer !== null) {map.removeControl(control_layer);}
-  control_layer = null;
+  // map.removeControl(control_layer);
+  // control_layer = L.control.layers(null, null);
   venues_layer = null;
+  heatmap_layer = null;
   regions_layer = null;
-  show_regions(city);
+  show_three_layers(city);
 }
 
-function show_heatmap(city, cat_or_time, likely_or_distinct, fval) {
+function show_three_layers(city) {
+  show_regions(city);
+  show_venues(city);
+  show_heatmap(city);
+}
 
-  function list_feature_values(result) {
-    d3.select('#feature_value').selectAll('option').remove(); // empty first
-    // parse jason to extract feature values
-    var raw = $.parseJSON(result);
-    var list_elems = new Array();
-    list_elems.push(EE('option', {}, "none"));
-    for (var cat in raw) {
-      // add each feature value as option with an event
-      list_elems.push(EE('option', {}, cat).on('click', display_single_feature, [cat]));
-    }
-    $('#feature_value').fill(list_elems);
-  }
-
-  function display_single_feature(feature_value) {
-    console.log(infix);
-  }
-
-
+function update_overlay_url(main) {
+  var query = $('#formui').values();
+  var parts = query.feature.split('_');
+  var cat_time_day = parts[0];
+  var likely_or_distinct = parts[1];
+  var feature_str = ({cat: 'primCategory', time: 'timeOfDay', day: 'dayOfWeek'})[cat_time_day];
+  var score_type = (likely_or_distinct === 'likely' ? 'likely': 'distinctive');
+  var city = $('#city').values().city;
+  var prefix = 'overlays/';
+  var infix =  city + '_' + feature_str + '_' + score_type + '_';
+  var suffix = main ? 'main.png' : query.feature_value + '.png';
+  var image_url = prefix + infix.replace(' ', '').replace("/", "+") + suffix;
+  var legend_url = 'overlays/legends/'+infix+'main.json';
   var raw_bounds = CITY_BOUNDS[city];
   var southWest = L.latLng(raw_bounds[0][1], raw_bounds[0][0]),
-    northEast = L.latLng(raw_bounds[1][1], raw_bounds[1][0]),
-    imageBounds = L.latLngBounds(southWest, northEast);
-  map.fitBounds(imageBounds);
+  northEast = L.latLng(raw_bounds[1][1], raw_bounds[1][0]),
+  imageBounds = L.latLngBounds(southWest, northEast);
 
-  // TODO use consistent keywords for features
-  var feature_str = (cat_or_time == 'cat'? 'primCategory': (cat_or_time == 'time'? 'timeOfDay': 'dayOfWeek'))
-  var score_type = (likely_or_distinct == 'likely'? 'likely': 'distinctive')
-  var infix =  city + '_' + feature_str + '_' + score_type;
-
-  if (fval == 'none') {
-      var imageURL = infix + '_' + 'main' + '.png';
-      imageURL = 'overlays/' + imageURL.replace(' ', '').replace("/", "+");
-      if (overlay_info.city === null) {
-        overlay_info.city = city;
-        overlay_info.url = imageURL;
-        overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
-        map.addLayer(overlay_info.layer);
-      }
-      if (overlay_info.city !== null && overlay_info.city !== city) {
-        map.removeLayer(overlay_info.layer);
-        overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
-        map.addLayer(overlay_info.layer);
-      }
-      if (overlay_info.url !== null && overlay_info.url !== imageURL) {
-        overlay_info.layer.setUrl(imageURL);
-      }
-      // fill list of feature values
-      // TODO do not do it every time
-      $.request('get', 'overlays/legends/'+infix+'_main.json', {})
-        .then(list_feature_values);
-  } else {
-    var imageURL = infix + '_' + fval + '.png';
-    imageURL = 'overlays/' + imageURL.replace(' ', '').replace("/", "+");
-    if (overlay_info.city === null) {
-        overlay_info.city = city;
-        overlay_info.url = imageURL;
-        overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
-        map.addLayer(overlay_info.layer);
-      }
-      if (overlay_info.city !== null && overlay_info.city !== city) {
-        map.removeLayer(overlay_info.layer);
-        overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
-        map.addLayer(overlay_info.layer);
-      }
-      if (overlay_info.url !== null && overlay_info.url !== imageURL) {
-        overlay_info.layer.setUrl(imageURL);
-      }
+  $.request('get', legend_url, {}).then(list_feature_values);
+  if (overlay_info.city === null) {
+    overlay_info.city = city;
+    overlay_info.url = image_url;
+    overlay_info.layer = L.imageOverlay(image_url, imageBounds);
+    control_layer.addOverlay(overlay_info.layer, "Heatmap");
+    map.addLayer(overlay_info.layer);
   }
-  $.request('get', 'overlays/legends/'+infix+'_main.json', {})
-      .then(display_legend);
+  if (overlay_info.city !== null && overlay_info.city !== city) {
+    map.removeLayer(overlay_info.layer);
+    overlay_info.layer = L.imageOverlay(image_url, imageBounds);
+    map.addLayer(overlay_info.layer);
+  }
+  if (overlay_info.url !== null && overlay_info.url !== image_url) {
+    overlay_info.layer.setUrl(image_url);
+  }
 }
 
-function display_legend(result) {
+function list_feature_values(result) {
+  d3.select('#feature_value').selectAll('option').remove(); // empty first
+  // parse json to extract feature values
   var raw = $.parseJSON(result);
+  var list_elems = [EE('option', {}, "a specific value"),];
+  for (var cat in raw) {
+    list_elems.push(EE('option', {value: cat.replace(/\s/g, '')}, cat.toLowerCase()));
+  }
+  $('#feature_value').fill(list_elems);
+  $('#focus').set({$display: 'inline'});
+  // TODO bad coupling, but why make 2 requests and parse json 2 times?
+  display_legend(raw);
+}
+function show_heatmap(city) {
+  update_overlay_url(true);
+}
+
+function display_legend(raw) {
+  // var raw = $.parseJSON(result);
   var data = [];
   for (var cat in raw) {
     data.push({"name": cat, "color": d3.rgb(raw[cat][0]*255, raw[cat][1]*255, raw[cat][2]*255).toString()});
@@ -363,16 +353,10 @@ function show_regions(city) {
       map.fitBounds(BOUNDS);
       map.setMaxBounds(BOUNDS.pad(.3));
       zoomLevel = map.getZoom();
-      maybe_add_control();
+      control_layer.addOverlay(regions_layer, "Regions");
     });
-  show_venues(city);
 }
-function maybe_add_control() {
-  if (venues_layer !== null && regions_layer !== null && control_layer === null) {
-    control_layer = L.control.layers(null, {"Regions": regions_layer, "Venues": venues_layer});
-    map.addControl(control_layer);
-  }
-}
+
 function show_venues(city) {
   $.request('get', 'regions/'+city+'_venues_compact.json', {})
     .then(create_venues_canvas);
@@ -393,7 +377,7 @@ function create_venues_canvas(result) {
     venues_layer = new MyLayer();
     venues_layer.setData(points);
     map.addLayer(venues_layer);
-    maybe_add_control();
+    control_layer.addOverlay(venues_layer, "Venues");
 }
 var MyLayer = L.FullCanvas.extend({
     drawSource: function(point, ctx, data) {
