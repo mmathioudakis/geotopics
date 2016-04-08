@@ -237,6 +237,25 @@ function styleMe(feature) {
 }
 
 function show_heatmap(city, cat_or_time, likely_or_distinct, fval) {
+
+  function list_feature_values(result) {
+    d3.select('#feature_value').selectAll('option').remove(); // empty first
+    // parse jason to extract feature values
+    var raw = $.parseJSON(result);
+    var list_elems = new Array();
+    list_elems.push(EE('option', {}, "none"));
+    for (var cat in raw) {
+      // add each feature value as option with an event
+      list_elems.push(EE('option', {}, cat).on('click', display_single_feature, [cat]));
+    }
+    $('#feature_value').fill(list_elems);
+  }
+
+  function display_single_feature(feature_value) {
+    console.log(infix);
+  }
+
+
   if (map === null) {map = create_map();}
   var raw_bounds = CITY_BOUNDS[city];
   var southWest = L.latLng(raw_bounds[0][1], raw_bounds[0][0]),
@@ -250,7 +269,8 @@ function show_heatmap(city, cat_or_time, likely_or_distinct, fval) {
   var infix =  city + '_' + feature_str + '_' + score_type;
 
   if (fval == 'none') {
-      var imageURL = 'overlays/' + infix + '_main.png';
+      var imageURL = infix + '_' + 'main' + '.png';
+      imageURL = 'overlays/' + imageURL.replace(' ', '').replace("/", "+");
       if (overlay_info.city === null) {
         overlay_info.city = city;
         overlay_info.url = imageURL;
@@ -270,27 +290,26 @@ function show_heatmap(city, cat_or_time, likely_or_distinct, fval) {
       $.request('get', 'overlays/legends/'+infix+'_main.json', {})
         .then(list_feature_values);
   } else {
-    // TODO show overlay for particular feature value
+    var imageURL = infix + '_' + fval + '.png';
+    imageURL = 'overlays/' + imageURL.replace(' ', '').replace("/", "+");
+    console.log('Trying ' + imageURL);
+    if (overlay_info.city === null) {
+        overlay_info.city = city;
+        overlay_info.url = imageURL;
+        overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
+        map.addLayer(overlay_info.layer);
+      }
+      if (overlay_info.city !== null && overlay_info.city !== city) {
+        map.removeLayer(overlay_info.layer);
+        overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
+        map.addLayer(overlay_info.layer);
+      }
+      if (overlay_info.url !== null && overlay_info.url !== imageURL) {
+        overlay_info.layer.setUrl(imageURL);
+      }
   }
   $.request('get', 'overlays/legends/'+infix+'_main.json', {})
       .then(display_legend);
-}
-
-function list_feature_values(result) {
-  d3.select('#feature_value').selectAll('option').remove(); // empty first
-  // parse jason to extract feature values
-  var raw = $.parseJSON(result);
-  var list_elems = new Array();
-  list_elems.push(EE('option', {}, "none"));
-  for (var cat in raw) {
-    // add each feature value as option with an event
-    list_elems.push(EE('option', {}, cat).on('click', display_single_feature, [cat]));
-  }
-  $('#feature_value').fill(list_elems);
-}
-
-function display_single_feature() {
-  // TODO
 }
 
 function display_legend(result) {
