@@ -78,3 +78,28 @@ svg#bars {
 #feature_value, #legend {
     text-transform: capitalize;
 }
+@media (max-width: 680px) {
+    body {
+	font-size: 10px;
+    }
+    #title {
+	font-size: 100%;
+	margin: 5px auto;
+    }
+    #main-left {
+	width: 97%;
+    }
+    #main-left, #main-right {
+	height: 92%;
+	top: 8%;
+    }
+    .city {
+	font-size: 100%;
+    }
+    .axis text {
+	font-size: 8px;
+    }
+    select {
+	border: 2px;
+    }
+}

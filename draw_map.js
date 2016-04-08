@@ -17,6 +17,7 @@ var max_region = urlParams.max_region ? parseInt(urlParams.max_region) : 18;
 var MINI = require('minified');
 var _ = MINI._, $ = MINI.$, $$ = MINI.$$, EE = MINI.EE, HTML = MINI.HTML;
 
+//TODO[mobile] shorter category name?
 var mainCats = ['Arts & Entertainment', 'College & University', 'Food',
   'Nightlife Spot', 'Outdoors & Recreation', 'Shop & Service',
   'Professional & Other Places', 'Residence', 'Travel & Transport'
@@ -185,6 +186,7 @@ function display_region(feature) {
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
   var bounding_rect = svg.node().getBoundingClientRect();
+  //TODO[mobile] smaller vertical margins
   var margin = { t: 30, r: 30, b: 100, l: 60 },
     w = bounding_rect.width - margin.l - margin.r,
     h = bounding_rect.height - margin.t - margin.b;
@@ -249,7 +251,7 @@ function change_city(city) {
   svg.selectAll("*").remove();
   d3.select('#neighborhoods').selectAll("*").remove();
   allRegions.length = 0;
-  // TODO see what happen to control when we change city
+  // TODO see what happen to control when we change city (everything get added twice, we need to fix that)
   // map.removeControl(control_layer);
   // control_layer = L.control.layers(null, null);
   venues_layer = null;
@@ -353,6 +355,7 @@ function show_regions(city) {
         if (BOUNDS) { BOUNDS.extend(poly.getBounds());
         } else { BOUNDS = poly.getBounds(); }
         feature.poly_index = i;
+        //TODO replace on click by select on change so that it works in Chrome
         list_elems.push(EE('option', {}, name).on('click', display_region, [feature])
           .on('mouseover', region_in, [i])
           .on('mouseout', region_out, [i]))
