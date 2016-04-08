@@ -167,11 +167,13 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
 function remove_region() {
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
+  $('#theta').fill('');
 }
 
 function display_region(feature) {
   var name = feature.properties.name;
-
+  $('#theta').fill(_.format(', which accounts for {{w::0.00}}% of the city mass.',
+        {w: 100*feature.properties.weight}));
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
   var bounding_rect = svg.node().getBoundingClientRect();
