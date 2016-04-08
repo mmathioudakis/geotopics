@@ -282,7 +282,7 @@ function update_overlay_url(main) {
   northEast = L.latLng(raw_bounds[1][1], raw_bounds[1][0]),
   imageBounds = L.latLngBounds(southWest, northEast);
 
-  $.request('get', legend_url, {}).then(list_feature_values);
+  if (main) {$.request('get', legend_url, {}).then(list_feature_values);}
   if (overlay_info.city === null) {
     overlay_info.city = city;
     overlay_info.url = image_url;
@@ -335,7 +335,7 @@ function display_legend(raw) {
     .append('li');
   li.append('div')
     .style("background-color", function (d) {return d.color;});
-  li.append('span').text(function (d) {return d.name;});
+  li.append('span').text(function (d) {return d.name.toLowerCase();});
 }
 
 function show_regions(city) {
