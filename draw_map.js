@@ -9,14 +9,14 @@ var urlParams;
     while (match = search.exec(query))
         urlParams[decode(match[1])] = decode(match[2]);
 })();
-var max_region = urlParams.max_region ? parseInt(urlParams.max_region) : 30;
+var max_region = urlParams.max_region ? parseInt(urlParams.max_region) : 18;
 
 // loading minified
 // see http://minifiedjs.com/docs/quickstart.html
 var MINI = require('minified');
 var _ = MINI._, $ = MINI.$, $$ = MINI.$$, EE = MINI.EE, HTML = MINI.HTML;
 
-var mainCats = ['Arts &\n Entertainment', 'College & University', 'Food',
+var mainCats = ['Arts & Entertainment', 'College & University', 'Food',
   'Nightlife Spot', 'Outdoors & Recreation', 'Shop & Service',
   'Professional & Other Places', 'Residence', 'Travel & Transport'
 ];
@@ -32,6 +32,8 @@ var lscale = null;
 var overlay_info = {city: null, url: null, layer: null};
 var map = null;
 var radius_factor = d3.scale.threshold().domain([0, 10, 13, 15, 17]).range([0, .1, .3, .6, .8, 1.2]);
+var initial_city_markers = null;
+var popups = {};
 
 function create_map() {
   L.mapbox.accessToken =
@@ -39,10 +41,9 @@ function create_map() {
   return L.mapbox.map('map', 'mapbox.light', {maxZoom: 19});
 }
 
-var initial_city_markers = null;
-var popups = {};
 function init() {
   map = create_map();
+  map.on('zoomend', function zoomEnded() {zoomLevel = map.getZoom();});
   var minx = 200, miny = 200, maxx = -200, maxy = -200;
   var markers = [];
   for (var city in CITY_BOUNDS) {
@@ -113,29 +114,15 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     .rangeRound(horiz_space)
     .nice();
   bars.append("rect")
-    .attr("x", function (d, i) {
-      return xscale(labels[i]);
-    })
-    .attr("y", function (d) {
-      return yscale(d);
-    })
+    .attr("x", function (d, i) { return xscale(labels[i]); })
+    .attr("y", function (d) { return yscale(d); })
     .attr("width", xscale.rangeBand())
-    .attr("fill", function (d, i) {
-      return colors(i);
-    })
-    .attr("height", function (d) {
-      return yscale(0) - yscale(d);
-    });
-  bars.append("text").text(function (d) {
-      return d3.format(label_format[nb_clicks])(d)
-    })
-    .attr("x", function (d, i) {
-      return xscale(labels[i]) + xscale.rangeBand() / 2;
-    })
+    .attr("fill", function (d, i) { return colors(i); })
+    .attr("height", function (d) { return yscale(0) - yscale(d); });
+  bars.append("text").text(function (d) { return d3.format(label_format[nb_clicks])(d) })
+    .attr("x", function (d, i) { return xscale(labels[i]) + xscale.rangeBand() / 2; })
     // TODO put text below with appropriate color http://stackoverflow.com/a/3943023
-    .attr("y", function (d) {
-      return yscale(d) - 5;
-    })
+    .attr("y", function (d) { return yscale(d) - 5; })
     .attr("text-anchor", "middle");
 
   var yAxis = d3.svg.axis()
@@ -165,24 +152,15 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
       svg.selectAll('.' + className + ' rect')
         .data(dataset)
         .transition()
-        .attr("y", function (d) {
-          return yscale(d);
-        })
-        .attr("height", function (d) {
-          return yscale(0) - yscale(d);
-        });
+        .attr("y", function (d) { return yscale(d); })
+        .attr("height", function (d) { return yscale(0) - yscale(d); });
       svg.selectAll('.' + className + ' text')
         .data(dataset)
         .transition()
-        .attr("y", function (d) {
-          return yscale(d) - 5;
-        })
-        .text(function (d) {
-          return d3.format(label_format[nb_clicks])(d)
-        });
+        .attr("y", function (d) { return yscale(d) - 5; })
+        .text(function (d) { return d3.format(label_format[nb_clicks])(d) });
       svg.select('#' + className).transition().call(yAxis);
-      svg.select('#toggle_' + className).transition().text(change_prompt[
-        nb_clicks]);
+      svg.select('#toggle_' + className).transition().text(change_prompt[nb_clicks]);
     });
 }
 
@@ -193,22 +171,15 @@ function remove_region() {
 
 function display_region(feature) {
   var name = feature.properties.name;
-  // $('#region-title').fill(name);
 
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
   var bounding_rect = svg.node().getBoundingClientRect();
-  var margin = {
-      t: 30,
-      r: 30,
-      b: 100,
-      l: 60
-    },
+  var margin = { t: 30, r: 30, b: 100, l: 60 },
     w = bounding_rect.width - margin.l - margin.r,
     h = bounding_rect.height - margin.t - margin.b;
   var height = bounding_rect.height;
 
-  var colors_cat = d3.scale.category10();
   var colors_cat = function (i) {
     return ['#f44336', '#2196f3', '#8bc34a', '#9c27b0', '#ff9800', '#795548', '#ffeb3b', '#ff4081', '#1de9b6'][i];
   }
@@ -244,10 +215,7 @@ function region_in(index) {
   var poly = allRegions[index];
   var Lpoly = poly._layers[Object.keys(poly._layers)[0]];
   Lpoly.bringToFront();
-  Lpoly.setStyle({
-    fillColor: "#47b8e0",
-    opacity: 1.0
-  });
+  Lpoly.setStyle({ fillColor: "#47b8e0", opacity: 1.0 });
 }
 
 function region_out(index) {
@@ -274,12 +242,6 @@ function change_city(city) {
   regions_layer = null;
   show_regions(city);
 }
-function onEachFeature(feature, layer) {
-  layer.bindLabel(feature.properties.title);
-}
-function styleMe(feature) {
-  return {weight: 0, fillOpacity: 0.8, fillColor: feature.properties.fill};
-}
 
 function show_heatmap(city, cat_or_time, likely_or_distinct, fval) {
 
@@ -301,7 +263,6 @@ function show_heatmap(city, cat_or_time, likely_or_distinct, fval) {
   }
 
 
-  if (map === null) {map = create_map();}
   var raw_bounds = CITY_BOUNDS[city];
   var southWest = L.latLng(raw_bounds[0][1], raw_bounds[0][0]),
     northEast = L.latLng(raw_bounds[1][1], raw_bounds[1][0]),
@@ -374,10 +335,6 @@ function display_legend(result) {
 }
 
 function show_regions(city) {
-  if (map === null) {
-    map = create_map();
-    map.on('zoomend', function zoomEnded() {zoomLevel = map.getZoom();});
-  }
   $.request('get', 'regions/'+city+'_distrib.json', {})
     .then(function success(result) {
       var regions = $.parseJSON(result);
@@ -387,23 +344,16 @@ function show_regions(city) {
       var i = 0;
       for (let feature of regions.features) {
         var name = feature.properties.name;
-        var poly = L.geoJson(feature, {
-          style: POLY_STYLE
-        });
+        var poly = L.geoJson(feature, { style: POLY_STYLE });
         allRegions.push(poly);
-        if (BOUNDS) {
-          BOUNDS.extend(poly.getBounds());
-        } else {
-          BOUNDS = poly.getBounds();
-        }
+        if (BOUNDS) { BOUNDS.extend(poly.getBounds());
+        } else { BOUNDS = poly.getBounds(); }
         feature.poly_index = i;
         list_elems.push(EE('option', {}, name).on('click', display_region, [feature])
           .on('mouseover', region_in, [i])
           .on('mouseout', region_out, [i]))
         i = i + 1;
-        if (i > max_region) {
-          break;
-        }
+        if (i > max_region) { break; }
       }
       regions_layer = L.layerGroup(allRegions);
       $('#neighborhoods').fill(EE('select', {"id": "neighborhoods_select"}, list_elems));
@@ -432,12 +382,8 @@ function create_venues_canvas(result) {
     var points = [];
     var max_visits = -1;
     _.each(venues, function add_venue(venue) {
-        if (venue[2] < 5) {
-          return;
-        }
-        if (venue[2] > max_visits) {
-          max_visits = venue[2];
-        }
+        if (venue[2] < 5) { return; }
+        if (venue[2] > max_visits) { max_visits = venue[2]; }
         var d = {"slat": venue[1], "slon": venue[0], "count": venue[2]};
         points.push(d);
     });
@@ -452,9 +398,7 @@ var MyLayer = L.FullCanvas.extend({
         ctx.beginPath();
         var radius = lscale(data.count);
         var color = "rgba(33, 33, 33, .82)";
-        if (radius > 2) {
-          color = "rgba(229, 57, 53, 0.82)"
-        }
+        if (radius > 2) { color = "rgba(229, 57, 53, 0.82)" }
         ctx.fillStyle = color;
         if (radius*radius_factor(zoomLevel) >= 0.6) {
           ctx.arc(point.x, point.y , 1.5*radius*radius_factor(zoomLevel), 0, 2 * Math.PI, true);
