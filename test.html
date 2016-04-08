@@ -65,9 +65,9 @@
         <option value="day_likely">Day of Week: Most likely</option> 
         <option value="day_distinct">Day of Week: Distinctive</option>
       </select>
-      <button type="submit">See</button>
       <label for="Value">Value</label>
-      <select id='feature_value' name="value">
+      <select id='feature_value' name="feature_value">
+        <option value="none">None</option>
       </select>
       <button type="submit">See</button>
     </form>
@@ -82,18 +82,19 @@
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.css' rel='stylesheet' />
     <script src="city_bounds.js" type="text/javascript" charset="utf-8"></script>
     <script src="draw_map.js" type="text/javascript" charset="utf-8"></script>
-  <script type="text/javascript" charset="utf-8">
-    var MINI = require('minified');
-    var _=MINI._, $=MINI.$, $$=MINI.$$, EE=MINI.EE, HTML=MINI.HTML;
-    function submitForm() {
-      var query = $('#myForm').values();
-      var parts = query.feature.split('_');
-      show_heatmap(query.city, parts[0], parts[1]);
-      return false;
-    }
-$.ready(function() {
-  show_heatmap('paris', 'cat', 'likely');
-});
-  </script>
+    <script type="text/javascript" charset="utf-8">
+      var MINI = require('minified');
+      var _=MINI._, $=MINI.$, $$=MINI.$$, EE=MINI.EE, HTML=MINI.HTML;
+      function submitForm() {
+        var query = $('#myForm').values();
+        var parts = query.feature.split('_');
+        var fval = query.feature_value;
+        show_heatmap(query.city, parts[0], parts[1], fval);
+        return false;
+      }
+      $.ready(function() {
+        show_heatmap('paris', 'cat', 'likely', 'none');
+      });
+    </script>
   </body>
 </html>

@@ -236,35 +236,63 @@ function styleMe(feature) {
   return {weight: 0, fillOpacity: 0.8, fillColor: feature.properties.fill};
 }
 
-function show_heatmap(city, cat_or_time, likely_or_distinct) {
+function show_heatmap(city, cat_or_time, likely_or_distinct, fval) {
   if (map === null) {map = create_map();}
   var raw_bounds = CITY_BOUNDS[city];
   var southWest = L.latLng(raw_bounds[0][1], raw_bounds[0][0]),
     northEast = L.latLng(raw_bounds[1][1], raw_bounds[1][0]),
     imageBounds = L.latLngBounds(southWest, northEast);
   map.fitBounds(imageBounds);
+
   // TODO use consistent keywords for features
   var feature_str = (cat_or_time == 'cat'? 'primCategory': (cat_or_time == 'time'? 'timeOfDay': 'dayOfWeek'))
   var score_type = (likely_or_distinct == 'likely'? 'likely': 'distinctive')
   var infix =  city + '_' + feature_str + '_' + score_type;
-  var imageURL = 'overlays/' + infix + '_main.png';
-  if (overlay_info.city === null) {
-    overlay_info.city = city;
-    overlay_info.url = imageURL;
-    overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
-    map.addLayer(overlay_info.layer);
-  }
-  if (overlay_info.city !== null && overlay_info.city !== city) {
-    map.removeLayer(overlay_info.layer);
-    overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
-    map.addLayer(overlay_info.layer);
-  }
-  if (overlay_info.url !== null && overlay_info.url !== imageURL) {
-    overlay_info.layer.setUrl(imageURL);
+
+  if (fval == 'none') {
+      var imageURL = 'overlays/' + infix + '_main.png';
+      if (overlay_info.city === null) {
+        overlay_info.city = city;
+        overlay_info.url = imageURL;
+        overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
+        map.addLayer(overlay_info.layer);
+      }
+      if (overlay_info.city !== null && overlay_info.city !== city) {
+        map.removeLayer(overlay_info.layer);
+        overlay_info.layer = L.imageOverlay(imageURL, imageBounds);
+        map.addLayer(overlay_info.layer);
+      }
+      if (overlay_info.url !== null && overlay_info.url !== imageURL) {
+        overlay_info.layer.setUrl(imageURL);
+      }
+      // fill list of feature values
+      // TODO do not do it every time
+      $.request('get', 'overlays/legends/'+infix+'_main.json', {})
+        .then(list_feature_values);
+  } else {
+    // TODO show overlay for particular feature value
   }
   $.request('get', 'overlays/legends/'+infix+'_main.json', {})
-    .then(display_legend);
+      .then(display_legend);
 }
+
+function list_feature_values(result) {
+  d3.select('#feature_value').selectAll('option').remove(); // empty first
+  // parse jason to extract feature values
+  var raw = $.parseJSON(result);
+  var list_elems = new Array();
+  list_elems.push(EE('option', {}, "none"));
+  for (var cat in raw) {
+    // add each feature value as option with an event
+    list_elems.push(EE('option', {}, cat).on('click', display_single_feature, [cat]));
+  }
+  $('#feature_value').fill(list_elems);
+}
+
+function display_single_feature() {
+  // TODO
+}
+
 function display_legend(result) {
   var raw = $.parseJSON(result);
   var data = [];
