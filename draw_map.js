@@ -35,10 +35,8 @@ var allFeatures = [];
 var zoomLevel = null;
 var regions_layer = null;
 var venues_layer = null;
-var heatmap_layer = null;
 var control_layer = null;
 var lscale = null;
-// TODO check overlay_info lifecycle (should it be reset sometimes?)
 var overlay_info = {city: null, url: null, layer: null};
 var map = null;
 var radius_factor = d3.scale.threshold().domain([0, 10, 13, 15, 17]).range([0, .1, .3, .6, .8, 1.2]);
@@ -52,6 +50,7 @@ function create_map() {
   map = L.mapbox.map('map', 'mapbox.light', {maxZoom: 19});
   map.on('zoomend', function zoomEnded() {zoomLevel = map.getZoom();});
   control_layer = L.control.layers(null, null);
+  control_layer.first_time = true;
 }
 
 function init() {
@@ -95,7 +94,7 @@ function resize_map(e) {
   //TODO this leave the popups in place, maybe better to set them to null as well?
   map.removeLayer(initial_city_markers);
   map.fitBounds([[raw[0][1], raw[0][0]], [raw[1][1], raw[1][0]]], {maxZoom: 18});
-  map.addControl(control_layer);
+  if (control_layer.first_time) { map.addControl(control_layer); }
   change_city(chosen_city);
 }
 
@@ -262,11 +261,18 @@ function change_city(city) {
   svg.selectAll("*").remove();
   allRegions.length = 0;
   allFeatures.length = 0;
-  // TODO see what happen to control when we change city (everything get added twice, we need to fix that)
-  // map.removeControl(control_layer);
-  // control_layer = L.control.layers(null, null);
+  if (!control_layer.first_time) {
+    control_layer.removeLayer(venues_layer);
+    control_layer.removeLayer(overlay_info.layer);
+    control_layer.removeLayer(regions_layer);
+    map.removeLayer(venues_layer);
+    map.removeLayer(overlay_info.layer);
+    map.removeLayer(regions_layer);
+  }
+  $('feature').set("value", "cat_likely");
+  control_layer.first_time = false;
   venues_layer = null;
-  heatmap_layer = null;
+  overlay_info = {city: null, url: null, layer: null};
   regions_layer = null;
   show_three_layers(city);
 }
@@ -296,16 +302,11 @@ function update_overlay_url(main) {
   imageBounds = L.latLngBounds(southWest, northEast);
 
   if (main) {$.request('get', legend_url, {}).then(list_feature_values);}
-  if (overlay_info.city === null) {
+  if (overlay_info.city !== city) {
     overlay_info.city = city;
     overlay_info.url = image_url;
     overlay_info.layer = L.imageOverlay(image_url, imageBounds);
     control_layer.addOverlay(overlay_info.layer, "Heatmap");
-    map.addLayer(overlay_info.layer);
-  }
-  if (overlay_info.city !== null && overlay_info.city !== city) {
-    map.removeLayer(overlay_info.layer);
-    overlay_info.layer = L.imageOverlay(image_url, imageBounds);
     map.addLayer(overlay_info.layer);
   }
   if (overlay_info.url !== null && overlay_info.url !== image_url) {
@@ -319,7 +320,6 @@ function list_feature_values(result) {
   var raw = $.parseJSON(result);
   var list_elems = [EE('option', {}, "a specific value"),];
   for (var cat in raw) {
-    //TODO cut long feature names?
     list_elems.push(EE('option', {'@title': cat.toTitleCase(), value: cat.replace(/\s/g, '')}, add_ellipsis(cat.toLowerCase())));
   }
   $('#feature_value').fill(list_elems);
