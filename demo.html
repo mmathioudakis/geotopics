@@ -33,7 +33,7 @@
     <div id='main-right'>
         <form id="formui">
             <p>
-            <label for="feature">See what is the most </label>
+            <label for="feature">See <span class="hide_on_mobile">what is </span>the most </label>
             <select onchange="update_overlay_url(true);" id="feature" name="feature">
                 <option value="cat_likely" selected>likely Category</option>
                 <option value="cat_distinct">distinctive Category</option>
@@ -42,7 +42,7 @@
                 <option value="day_likely">likely Day of Week</option>
                 <option value="day_distinct">distinctive Day of Week</option>
             </select>
-            of each cell in the city <span id="focus">(
+            <span class="hide_on_mobile">of each cell </span>in the city <span id="focus">(
                 <label for="feature_value">and focus on&nbsp;</label>
             <select onchange="update_overlay_url(false);" id='feature_value' name="feature_value">
             </select>).

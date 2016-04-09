@@ -17,7 +17,9 @@ var max_region = urlParams.max_region ? parseInt(urlParams.max_region) : 18;
 var MINI = require('minified');
 var _ = MINI._, $ = MINI.$, $$ = MINI.$$, EE = MINI.EE, HTML = MINI.HTML;
 
-function add_ellipsis(string, max_len) {let len = max_len||20; return (string.length <= len) ? string : string.substring(0, len) + '…';}
+var smallScreen = window.matchMedia("(max-width: 900px)").matches;
+var default_len = smallScreen ? 14 : 20;
+function add_ellipsis(string, max_len) {let len = max_len||default_len; return (string.length <= len) ? string : string.substring(0, len) + '…';}
 // http://stackoverflow.com/a/5574446
 String.prototype.toTitleCase = function () {
     return this.replace(/\b[\w-\']+/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
@@ -200,8 +202,9 @@ function display_region() {
   svg.selectAll("*").remove();
   var bounding_rect = svg.node().getBoundingClientRect();
   //TODO[mobile] smaller vertical margins
-  var margin = { t: 25, r: 10, b: 75, l: 60 },
-    w = bounding_rect.width - margin.l - margin.r,
+  var margin = { t: 25, r: 10, b: 75, l: 60 };
+  if (smallScreen) {margin = {t: 20, r: 5, b: 60, l: 30 };}
+  var  w = bounding_rect.width - margin.l - margin.r,
     h = bounding_rect.height - margin.t - margin.b;
   var height = bounding_rect.height;
 

@@ -85,9 +85,10 @@ svg#bars {
 #feature_value, #legend {
     text-transform: capitalize;
 }
-@media (max-width: 680px) {
+@media (max-width: 900px) {
+    .hide_on_mobile {display: none;}
     body {
-	font-size: 10px;
+	font-size: 8px;
     }
     #title {
 	font-size: 100%;
@@ -107,6 +108,10 @@ svg#bars {
 	font-size: 8px;
     }
     select {
-	border: 2px;
+	border: 1px;
+    }
+    #formui {margin-bottom: -8px;}
+    #legend {
+	font-size: 8px;
     }
 }
