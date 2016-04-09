@@ -17,7 +17,6 @@ var max_region = urlParams.max_region ? parseInt(urlParams.max_region) : 18;
 var MINI = require('minified');
 var _ = MINI._, $ = MINI.$, $$ = MINI.$$, EE = MINI.EE, HTML = MINI.HTML;
 
-//TODO[mobile] shorter category name?
 function add_ellipsis(string, max_len) {let len = max_len||20; return (string.length <= len) ? string : string.substring(0, len) + '…';}
 // http://stackoverflow.com/a/5574446
 String.prototype.toTitleCase = function () {
@@ -27,6 +26,8 @@ var mainCats = ['Arts & Entertainment', 'College & University', 'Food',
   'Nightlife Spot', 'Outdoors & Recreation', 'Shop & Service',
   'Professional & Other Places', 'Residence', 'Travel & Transport'
 ];
+var shortCats = ['Entertainment', 'Education', 'Food', 'Nightlife',
+    'Outdoors', 'Shop & Service', 'Professional', 'Residence', 'Transport'];
 var timeOfDay = ['morning', 'noon', 'afternoon', 'evening', 'night',
   'late night'
 ];
@@ -49,6 +50,8 @@ function create_map() {
   // TODO how come maxZoom option isn't honored?
   map = L.mapbox.map('map', 'mapbox.light', {maxZoom: 19});
   map.on('zoomend', function zoomEnded() {zoomLevel = map.getZoom();});
+  map.on('overlayadd', layer_turned_on);
+  map.on('overlayremove', layer_turned_off);
   control_layer = L.control.layers(null, null);
   control_layer.first_time = true;
 }
@@ -153,7 +156,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
   // TODO instead of appending to SVG, we could add the select element from there and still link to that change function
   svg.append("text")
     .attr("x", y_pos)
-    .attr('y', horiz_space[1]-margin.t/3)
+    .attr('y', horiz_space[1]-margin.t/2)
     .attr('id', 'toggle_' + className)
     .text(change_prompt[nb_clicks])
     .on('click', function () {
@@ -197,7 +200,7 @@ function display_region() {
   svg.selectAll("*").remove();
   var bounding_rect = svg.node().getBoundingClientRect();
   //TODO[mobile] smaller vertical margins
-  var margin = { t: 30, r: 30, b: 100, l: 60 },
+  var margin = { t: 25, r: 10, b: 75, l: 60 },
     w = bounding_rect.width - margin.l - margin.r,
     h = bounding_rect.height - margin.t - margin.b;
   var height = bounding_rect.height;
@@ -206,7 +209,7 @@ function display_region() {
     return ['#f44336', '#2196f3', '#8bc34a', '#9c27b0', '#ff9800', '#795548', '#ffeb3b', '#ff4081', '#1de9b6'][i];
   }
   var xScale_cat = d3.scale.ordinal()
-    .domain(mainCats)
+    .domain(shortCats)
     .rangeRoundBands([margin.l, bounding_rect.width - margin.r], 0.15, 0.2);
   var xAxis_cat = d3.svg.axis()
     .scale(xScale_cat)
@@ -225,7 +228,7 @@ function display_region() {
   set_x_axis(svg, 0, height - margin.b + 5, xAxis_time);
 
   draw_bars(svg, feature.properties.category_distrib, 'cat_bar', 20, height,
-    margin, xScale_cat, mainCats, colors_cat, feature.properties.category_more, true
+    margin, xScale_cat, shortCats, colors_cat, feature.properties.category_more, true
   );
   draw_bars(svg, feature.properties.time_distrib, 'time_bar', 20, height,
     margin, xScale_time, timeOfDay, colors_time, feature.properties.time_more, false
@@ -274,6 +277,8 @@ function change_city(city) {
   venues_layer = null;
   overlay_info = {city: null, url: null, layer: null};
   regions_layer = null;
+  $('#bars').set({$display: "block"});
+  $('#legend').set({$display: "block"});
   show_three_layers(city);
 }
 
@@ -331,9 +336,14 @@ function show_heatmap(city) {
   update_overlay_url(true);
 }
 
-//TODO should “display: none” the legend when heatmap layer is turned off?
-//TODO likewise, maybe call remove_region when regions_layer is turned off?
-//TODO in general, we should probably react more when layers are turned on/off http://leafletjs.com/reference.html#control-layers-overlayadd
+function layer_turned_on(layer) {
+  if (layer.name === "Regions") { $('#bars').set({$display: "block"}); }
+  if (layer.name === "Heatmap") { $('#legend').set({$display: "block"}); }
+}
+function layer_turned_off(layer) {
+  if (layer.name === "Regions") { $('#bars').set({$display: "none"}); }
+  if (layer.name === "Heatmap") { $('#legend').set({$display: "none"}); }
+}
 function display_legend(raw) {
   // var raw = $.parseJSON(result);
   var data = [];
