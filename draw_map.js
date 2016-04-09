@@ -26,6 +26,7 @@ var timeOfDay = ['morning', 'noon', 'afternoon', 'evening', 'night',
   'late night'
 ];
 var allRegions = [];
+var allFeatures = [];
 var zoomLevel = null;
 var regions_layer = null;
 var venues_layer = null;
@@ -179,7 +180,10 @@ function remove_region() {
   $('#theta').fill('');
 }
 
-function display_region(feature) {
+function display_region() {
+  var index = parseInt($('#neighborhoods').get('value'));
+  if (index === -1) {return remove_region();}
+  var feature = allFeatures[index];
   var name = feature.properties.name;
   $('#theta').fill(_.format(', which accounts for {{w::0.00}}% of the city mass.',
         {w: 100*feature.properties.weight}));
@@ -251,6 +255,7 @@ function change_city(city) {
   svg.selectAll("*").remove();
   d3.select('#neighborhoods').selectAll("*").remove();
   allRegions.length = 0;
+  allFeatures.length = 0;
   // TODO see what happen to control when we change city (everything get added twice, we need to fix that)
   // map.removeControl(control_layer);
   // control_layer = L.control.layers(null, null);
@@ -345,25 +350,25 @@ function show_regions(city) {
     .then(function success(result) {
       var regions = $.parseJSON(result);
       var list_elems = new Array();
-      list_elems.push(EE('option', {}, "some region").on('click', remove_region))
+      list_elems.push(EE('option', {value: "-1"}, "some region"));
       var BOUNDS = null;
       var i = 0;
       for (let feature of regions.features) {
         var name = feature.properties.name;
         var poly = L.geoJson(feature, { style: POLY_STYLE });
         allRegions.push(poly);
+        allFeatures.push(feature);
         if (BOUNDS) { BOUNDS.extend(poly.getBounds());
         } else { BOUNDS = poly.getBounds(); }
         feature.poly_index = i;
-        //TODO replace on click by select on change so that it works in Chrome
-        list_elems.push(EE('option', {}, name).on('click', display_region, [feature])
+        list_elems.push(EE('option', {value: i}, name));
           .on('mouseover', region_in, [i])
           .on('mouseout', region_out, [i]))
         i = i + 1;
         if (i > max_region) { break; }
       }
       regions_layer = L.layerGroup(allRegions);
-      $('#neighborhoods').fill(EE('select', {"id": "neighborhoods_select"}, list_elems));
+      $('#neighborhoods').fill(list_elems);
       map.addLayer(regions_layer);
       map.fitBounds(BOUNDS);
       map.setMaxBounds(BOUNDS.pad(.3));
