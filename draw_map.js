@@ -18,6 +18,11 @@ var MINI = require('minified');
 var _ = MINI._, $ = MINI.$, $$ = MINI.$$, EE = MINI.EE, HTML = MINI.HTML;
 
 //TODO[mobile] shorter category name?
+function add_ellipsis(string, max_len) {let len = max_len||20; return (string.length <= len) ? string : string.substring(0, len) + '…';}
+// http://stackoverflow.com/a/5574446
+String.prototype.toTitleCase = function () {
+    return this.replace(/\b[\w-\']+/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+};
 var mainCats = ['Arts & Entertainment', 'College & University', 'Food',
   'Nightlife Spot', 'Outdoors & Recreation', 'Shop & Service',
   'Professional & Other Places', 'Residence', 'Travel & Transport'
@@ -45,8 +50,6 @@ function create_map() {
     'pk.eyJ1IjoiZGF1cmVnIiwiYSI6ImNpbGF4aTkwZTAwM3l2d2x6bGNsd3JhOWkifQ.ga2zNgyopN05cNJ1tbviWQ';
   // TODO how come maxZoom option isn't honored?
   map = L.mapbox.map('map', 'mapbox.light', {maxZoom: 19});
-  //TODO do we need a scale?
-  // L.control.scale().addTo(map);
   map.on('zoomend', function zoomEnded() {zoomLevel = map.getZoom();});
   control_layer = L.control.layers(null, null);
 }
@@ -257,7 +260,6 @@ function change_city(city) {
   //TODO call remove_region?
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
-  d3.select('#neighborhoods').selectAll("*").remove();
   allRegions.length = 0;
   allFeatures.length = 0;
   // TODO see what happen to control when we change city (everything get added twice, we need to fix that)
@@ -318,7 +320,7 @@ function list_feature_values(result) {
   var list_elems = [EE('option', {}, "a specific value"),];
   for (var cat in raw) {
     //TODO cut long feature names?
-    list_elems.push(EE('option', {value: cat.replace(/\s/g, '')}, cat.toLowerCase()));
+    list_elems.push(EE('option', {'@title': cat.toTitleCase(), value: cat.replace(/\s/g, '')}, add_ellipsis(cat.toLowerCase())));
   }
   $('#feature_value').fill(list_elems);
   $('#focus').set({$display: 'inline'});
@@ -346,7 +348,9 @@ function display_legend(raw) {
     .append('li');
   li.append('div')
     .style("background-color", function (d) {return d.color;});
-  li.append('span').text(function (d) {return d.name.toLowerCase();});
+  li.append('span')
+    .text(function (d) {return add_ellipsis(d.name.toTitleCase());})
+    .attr('title', function(d) {return d.name.toTitleCase();});
 }
 
 function show_regions(city) {
