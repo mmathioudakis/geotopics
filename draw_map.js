@@ -182,11 +182,11 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     });
 }
 
-//TODO more stuff to clean here?
 function remove_region() {
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
   $('#theta').fill('');
+  $('#neighborhoods').set('value', "-1");
 }
 
 function display_region() {
@@ -256,12 +256,8 @@ var POLY_STYLE = {
   opacity: 0.7
 };
 
-
-//TODO more cleaning?
 function change_city(city) {
-  //TODO call remove_region?
-  var svg = d3.select('#bars');
-  svg.selectAll("*").remove();
+  remove_region();
   allRegions.length = 0;
   allFeatures.length = 0;
   if (!control_layer.first_time) {
@@ -279,6 +275,7 @@ function change_city(city) {
   regions_layer = null;
   $('#bars').set({$display: "block"});
   $('#legend').set({$display: "block"});
+  $('#legend').fill('');
   show_three_layers(city);
 }
 
