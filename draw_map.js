@@ -1,3 +1,9 @@
+function setFullScreen() {
+  if (document.documentElement.requestFullscreen) { document.documentElement.requestFullscreen();
+  } else if (document.documentElement.msRequestFullscreen) { document.documentElement.msRequestFullscreen();
+  } else if (document.documentElement.mozRequestFullScreen) { document.documentElement.mozRequestFullScreen();
+  } else if (document.documentElement.webkitRequestFullscreen) { document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT); }
+}
 var urlParams;
 (window.onpopstate = function () {
     var match,
@@ -50,7 +56,8 @@ function create_map() {
   L.mapbox.accessToken =
     'pk.eyJ1IjoiZGF1cmVnIiwiYSI6ImNpbGF4aTkwZTAwM3l2d2x6bGNsd3JhOWkifQ.ga2zNgyopN05cNJ1tbviWQ';
   // TODO how come maxZoom option isn't honored?
-  map = L.mapbox.map('map', 'mapbox.light', {maxZoom: 19});
+  // TODO disabling zoom animation is better for canvas but not very smooth otherwise…
+  map = L.mapbox.map('map', 'mapbox.light', {maxZoom: 19, zoomAnimation: false});
   map.on('zoomend', function zoomEnded() {zoomLevel = map.getZoom();});
   map.on('overlayadd', layer_turned_on);
   map.on('overlayremove', layer_turned_off);
@@ -89,6 +96,7 @@ function init() {
   map.fitBounds([[minx-2, miny-2], [maxx+2, maxy+2]], {maxZoom: 18});
 }
 function resize_map(e) {
+  setFullScreen();
   var chosen_city = e===null ? $('#city').get('value') : e.target.city;
   var raw = CITY_BOUNDS[chosen_city];
   $("#city").set({value: chosen_city});
@@ -420,14 +428,19 @@ function create_venues_canvas(result) {
 var MyLayer = L.FullCanvas.extend({
     drawSource: function(point, ctx, data) {
         ctx.beginPath();
+        // TODO display is really buggy, but why?
         var radius = lscale(data.count);
         var color = "rgba(33, 33, 33, .82)";
-        // TODO display is really buggy, but why?
         if (radius > 2) { color = "rgba(229, 57, 53, 0.82)" }
         ctx.fillStyle = color;
+          ctx.arc(point.x, point.y , 2*radius*radius_factor(zoomLevel), 0, 2 * Math.PI, true);
+        /*
         if (radius*radius_factor(zoomLevel) >= 0.6) {
           ctx.arc(point.x, point.y , 1.5*radius*radius_factor(zoomLevel), 0, 2 * Math.PI, true);
         }
+        ctx.fillStyle = "rgba(33, 33, 33, .82)";
+        ctx.arc(point.x, point.y , 1, 0, 2*Math.PI, true);
+        */
         ctx.fill();
     }
 });
