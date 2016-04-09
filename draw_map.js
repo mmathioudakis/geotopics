@@ -361,9 +361,9 @@ function show_regions(city) {
         if (BOUNDS) { BOUNDS.extend(poly.getBounds());
         } else { BOUNDS = poly.getBounds(); }
         feature.poly_index = i;
-        list_elems.push(EE('option', {value: i}, name));
+        list_elems.push(EE('option', {value: i}, name)
           .on('mouseover', region_in, [i])
-          .on('mouseout', region_out, [i]))
+          .on('mouseout', region_out, [i]));
         i = i + 1;
         if (i > max_region) { break; }
       }
