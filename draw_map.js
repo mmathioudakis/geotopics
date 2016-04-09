@@ -55,6 +55,7 @@ function init() {
   create_map();
   var minx = 200, miny = 200, maxx = -200, maxy = -200;
   var markers = [];
+  var options = [EE('option', {value: null, selected: true}, 'some city')];
   for (var city in CITY_BOUNDS) {
     var name = CITY_BOUNDS[city][2];
     var x = (CITY_BOUNDS[city][0][1] + CITY_BOUNDS[city][1][1])/2;
@@ -67,12 +68,15 @@ function init() {
     var popup = L.popup({autoPan: false}).setLatLng([x, y]).setContent('<h3 class="city">'+name+'</h3>');
     marker.bindPopup(popup);
     popups[city] = popup;
-    $('#o_'+city).on('mouseover', function(e){popups[e.target.value].openOn(map);});
-    $('#o_'+city).on('mouseout', function(e){map.closePopup(popups[e.target.value]);});
+    var css_class = (MEANINGFUL.indexOf(city) === -1) ? "" : "meaningful";
+    options.push(EE('option', {value: city, "@class": css_class}, name)
+        .on('mouseover', function(e){popups[e.target.value].openOn(map);})
+        .on('mouseout', function(e){map.closePopup(popups[e.target.value]);}));
     marker.city = city;
     marker.on('click', resize_map);
     markers.push(marker);
   }
+  $('#city').fill(options);
   initial_city_markers = L.layerGroup(markers);
   initial_city_markers.addTo(map);
   map.fitBounds([[minx-2, miny-2], [maxx+2, maxy+2]], {maxZoom: 18});

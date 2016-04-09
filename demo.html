@@ -23,50 +23,7 @@
 <body>
     <div id='title'>
         <label for="city">GeoTopics: Exploring the Traces of Urban Activity in </label>
-        <select autofocus name="city" id="city" onchange="resize_map(null);" size="1">
-            <!--TODO choose which cities are meaningful (the one with less checkins are boring from a first look, all their regions are the same with no distinctiveness) -->
-            <option value="null" selected>some city</option>
-            <option id="o_amsterdam" value="amsterdam">Amsterdam</option>
-            <option id="o_ankara" value="ankara">Ankara</option>
-            <option id="o_antalya" value="antalya">Antalya</option>
-            <option id="o_atlanta" value="atlanta">Atlanta</option>
-            <option id="o_barcelona" value="barcelona">Barcelona</option>
-            <option id="o_belohorizonte" value="belohorizonte">Belo Horizonte</option>
-            <option id="o_berlin" value="berlin">Berlin</option>
-            <option id="o_chicago" value="chicago">Chicago</option>
-            <option id="o_fortaleza" value="fortaleza">Fortaleza</option>
-            <option id="o_helsinki" value="helsinki">Helsinki</option>
-            <option id="o_houston-k59" value="houston-k59">Houston</option>
-            <option id="o_indianapolis" value="indianapolis">Indianapolis</option>
-            <option id="o_istanbul-k59" value="istanbul-k59">Istanbul</option>
-            <option id="o_izmir" value="izmir">Izmir</option>
-            <option id="o_kualalumpur" value="kualalumpur">Kuala Lumpur</option>
-            <option id="o_london" value="london">London</option>
-            <option id="o_losangeles" value="losangeles">Los Angeles</option>
-            <option id="o_mexicocity" value="mexicocity">Mexico City</option>
-            <option id="o_moscow" value="moscow">Moscow</option>
-            <option id="o_newyork" value="newyork">New York</option>
-            <option class="meaningful" id="o_paris" value="paris">Paris</option>
-            <option id="o_portoalegre" value="portoalegre">Porto Alegre</option>
-            <option id="o_prague" value="prague">Prague</option>
-            <option id="o_recife" value="recife">Recife</option>
-            <option id="o_riodejaneiro" value="riodejaneiro">Rio De Janeiro</option>
-            <option id="o_rome" value="rome">Rome</option>
-            <option id="o_salvador-k59" value="salvador-k59">Salvador</option>
-            <option id="o_sandiego" value="sandiego">San Diego</option>
-            <option id="o_sanfrancisco" value="sanfrancisco">San Francisco</option>
-            <option id="o_santiagodechile" value="santiagodechile">Santiago De Chile</option>
-            <option id="o_saopaulo" value="saopaulo">Sao Paulo</option>
-            <option id="o_seattle" value="seattle">Seattle</option>
-            <option id="o_seoul" value="seoul">Seoul</option>
-            <option id="o_singapore" value="singapore">Singapore</option>
-            <option id="o_stlouis" value="stlouis">St. Louis</option>
-            <option id="o_stockholm" value="stockholm">Stockholm</option>
-            <option id="o_stpetersburg" value="stpetersburg">St. Petersburg</option>
-            <option id="o_tokyo" value="tokyo">Tokyo</option>
-            <option id="o_washington" value="washington">Washington</option>
-            <option id="o_yokohama" value="yokohama">Yokohama</option>
-        </select>
+        <select autofocus name="city" id="city" onchange="resize_map(null);" size="1"></select>
     </div>
     <div id='main-left'>
         <div id='map'></div>
@@ -97,7 +54,7 @@
             <select onchange="display_region();" name="neighborhoods" id="neighborhoods"></select><span id="theta"></span>
             </p>
         </form>
-        <svg id='bars'></svg>
+        <svg id="bars"></svg>
     </div>
 </body>
     <script src="draw_map.js" type="text/javascript" charset="utf-8"></script>
