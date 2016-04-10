@@ -159,7 +159,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     svg.append("polygon")
       .attr("class", "arrow")
       .on("click", function() {toggle_chart(svg[0][0].id);})
-      .attr("points", [tip-120, margin.t, tip, margin.t+50, tip-120, margin.t+100].join(','));
+      .attr("points", [tip-60, margin.t, tip, margin.t+25, tip-60, margin.t+50].join(','));
   }
   var yAxis = d3.svg.axis()
     .scale(yscale)
