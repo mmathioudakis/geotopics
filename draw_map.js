@@ -138,6 +138,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     .attr('class', className);
 
   var horiz_space = upper ? [h / 2 - margin.b, margin.t] : [h - margin.b, h / 2 + margin.t]
+  if (smallScreen) {horiz_space = [h - margin.b, margin.t];}
   var yscale = d3.scale.linear()
     .domain([0, d3.max(dataset)])
     .rangeRound(horiz_space)
@@ -153,7 +154,13 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     // TODO put text below with appropriate color http://stackoverflow.com/a/3943023
     .attr("y", function (d) { return yscale(d) - 5; })
     .attr("text-anchor", "middle");
-
+  if (smallScreen) {
+    var tip = parseInt(xscale.rangeExtent()[1]);
+    svg.append("polygon")
+      .attr("class", "arrow")
+      .on("click", function() {toggle_chart(svg[0][0].id);})
+      .attr("points", [tip-120, margin.t, tip, margin.t+50, tip-120, margin.t+100].join(','));
+  }
   var yAxis = d3.svg.axis()
     .scale(yscale)
     .orient("left")
@@ -189,6 +196,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
         .text(function (d) { return d3.format(label_format[nb_clicks])(d) });
       svg.select('#' + className).transition().call(yAxis);
       svg.select('#toggle_' + className).transition().text(change_prompt[nb_clicks]);
+      d3.event.stopPropagation();
     });
 }
 
@@ -198,7 +206,11 @@ function remove_region() {
   $('#theta').fill('');
   $('#neighborhoods').set('value', "-1");
 }
-
+function toggle_chart(which_one) {
+  var other = which_one === 'bars' ? 'bars2' : 'bars';
+  $('#'+which_one).set({$display: 'none'});
+  $('#'+other).set({$display: 'block'});
+}
 function display_region() {
   var index = parseInt($('#neighborhoods').get('value'));
   if (index === -1) {return remove_region();}
@@ -208,8 +220,11 @@ function display_region() {
         {w: 100*feature.properties.weight}));
   var svg = d3.select('#bars');
   svg.selectAll("*").remove();
+  if (smallScreen) {
+    var svg2 = d3.select('#bars2');
+    svg2.selectAll("*").remove();
+  }
   var bounding_rect = svg.node().getBoundingClientRect();
-  //TODO[mobile] smaller vertical margins
   var margin = { t: 25, r: 10, b: 75, l: 60 };
   if (smallScreen) {margin = {t: 20, r: 5, b: 60, l: 30 };}
   var  w = bounding_rect.width - margin.l - margin.r,
@@ -235,13 +250,18 @@ function display_region() {
   var xAxis_time = d3.svg.axis()
     .scale(xScale_time)
     .orient("bottom");
-  set_x_axis(svg, 0, height / 2 - margin.b + 5, xAxis_cat);
-  set_x_axis(svg, 0, height - margin.b + 5, xAxis_time);
+  if (smallScreen) {
+    set_x_axis(svg, 0, height - margin.b + 5, xAxis_cat);
+    set_x_axis(svg2, 0, height - margin.b + 5, xAxis_time);
+  } else {
+    set_x_axis(svg, 0, height / 2 - margin.b + 5, xAxis_cat);
+    set_x_axis(svg, 0, height - margin.b + 5, xAxis_time);
+  }
 
   draw_bars(svg, feature.properties.category_distrib, 'cat_bar', 20, height,
     margin, xScale_cat, shortCats, colors_cat, feature.properties.category_more, true
   );
-  draw_bars(svg, feature.properties.time_distrib, 'time_bar', 20, height,
+  draw_bars(smallScreen ? svg2 : svg, feature.properties.time_distrib, 'time_bar', 20, height,
     margin, xScale_time, timeOfDay, colors_time, feature.properties.time_more, false
   );
   // TODO: display two sentences highlighting most frequent category and timeOfDay? (no more space!)
@@ -285,6 +305,7 @@ function change_city(city) {
   overlay_info = {city: null, url: null, layer: null};
   regions_layer = null;
   $('#bars').set({$display: "block"});
+  $('#bars2').set({$display: "none"});
   $('#legend').set({$display: "block"});
   $('#legend').fill('');
   show_three_layers(city);

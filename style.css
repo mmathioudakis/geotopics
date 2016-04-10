@@ -56,9 +56,18 @@ body {
     -moz-column-count: 4;
 }
 
-svg#bars {
+svg#bars, svg#bars2 {
     width: 100%;
     height: 91%;
+}
+#bars2 {display: none;}
+.arrow {
+    fill: aliceblue;
+    stroke-linejoin: round;
+    stroke-width: 2px;
+    stroke: dodgerblue;
+    opacity: 0.5;
+    cursor: pointer;
 }
 .axis path,
 .axis line {
