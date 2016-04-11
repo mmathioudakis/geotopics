@@ -39,6 +39,7 @@ var shortCats = ['Entertainment', 'Education', 'Food', 'Nightlife',
 var timeOfDay = ['morning', 'noon', 'afternoon', 'evening', 'night',
   'late night'
 ];
+var dayOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 var allRegions = [];
 var allFeatures = [];
 var zoomLevel = null;
@@ -207,7 +208,7 @@ function remove_region() {
   $('#neighborhoods').set('value', "-1");
 }
 function toggle_chart(which_one) {
-  var other = which_one === 'bars' ? 'bars2' : 'bars';
+  var other = {'bars': 'bars2', 'bars2': 'bars3', 'bars3': 'bars'}[which_one];
   $('#'+which_one).set({$display: 'none'});
   $('#'+other).set({$display: 'block'});
 }
@@ -223,6 +224,8 @@ function display_region() {
   if (smallScreen) {
     var svg2 = d3.select('#bars2');
     svg2.selectAll("*").remove();
+    var svg3 = d3.select('#bars3');
+    svg3.selectAll("*").remove();
   }
   var bounding_rect = svg.node().getBoundingClientRect();
   var margin = { t: 25, r: 10, b: 75, l: 60 };
@@ -242,20 +245,33 @@ function display_region() {
     .orient("bottom");
   // https://github.com/mbostock/d3/blob/master/lib/colorbrewer/colorbrewer.js
   var colors_time = function (i) {
-    return ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404"][i];
+    return ["#fee391","#fec44f","#fe9929","#ec7014","#cc4c02","#993404","#662506"][i];
   }
+  var end_axis = smallScreen ? bounding_rect.width - margin.r : bounding_rect.width/2;
   var xScale_time = d3.scale.ordinal()
     .domain(timeOfDay)
-    .rangeRoundBands([margin.l, bounding_rect.width - margin.r], 0.15, 0.2);
+    .rangeRoundBands([margin.l, end_axis], 0.1, 0.15);
   var xAxis_time = d3.svg.axis()
     .scale(xScale_time)
+    .orient("bottom");
+  var colors_day = function(i) {
+    return ["#ccece6","#99d8c9","#66c2a4","#41ae76","#238b45","#006d2c","#00441b"][i];
+  }
+  var begin_axis = smallScreen ? margin.l : bounding_rect.width/2 + margin.l;
+  var xScale_day = d3.scale.ordinal()
+    .domain(dayOfWeek)
+    .rangeRoundBands([begin_axis, bounding_rect.width - margin.r], 0.1, 0.15);
+  var xAxis_day = d3.svg.axis()
+    .scale(xScale_day)
     .orient("bottom");
   if (smallScreen) {
     set_x_axis(svg, 0, height - margin.b + 5, xAxis_cat);
     set_x_axis(svg2, 0, height - margin.b + 5, xAxis_time);
+    set_x_axis(svg3, 0, height - margin.b + 5, xAxis_day);
   } else {
     set_x_axis(svg, 0, height / 2 - margin.b + 5, xAxis_cat);
     set_x_axis(svg, 0, height - margin.b + 5, xAxis_time);
+    set_x_axis(svg, 0, height - margin.b + 5, xAxis_day);
   }
 
   draw_bars(svg, feature.properties.category_distrib, 'cat_bar', 20, height,
@@ -264,6 +280,9 @@ function display_region() {
   draw_bars(smallScreen ? svg2 : svg, feature.properties.time_distrib, 'time_bar', 20, height,
     margin, xScale_time, timeOfDay, colors_time, feature.properties.time_more, false
   );
+  draw_bars(smallScreen ? svg3 : svg, feature.properties.days_distrib,
+      'days_bar', 20+(smallScreen ? 0 : bounding_rect.width/2), height, margin, xScale_day,
+      dayOfWeek, colors_day, feature.properties.days_more, false);
   // TODO: display two sentences highlighting most frequent category and timeOfDay? (no more space!)
 }
 
@@ -306,6 +325,7 @@ function change_city(city) {
   regions_layer = null;
   $('#bars').set({$display: "block"});
   $('#bars2').set({$display: "none"});
+  $('#bars3').set({$display: "none"});
   $('#legend').set({$display: "block"});
   $('#legend').fill('');
   show_three_layers(city);

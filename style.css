@@ -56,11 +56,11 @@ body {
     -moz-column-count: 4;
 }
 
-svg#bars, svg#bars2 {
+svg#bars, svg#bars2, svg#bars3 {
     width: 100%;
     height: 91%;
 }
-#bars2 {display: none;}
+#bars2, #bars3 {display: none;}
 .arrow {
     fill: aliceblue;
     stroke-linejoin: round;
@@ -82,6 +82,7 @@ svg#bars, svg#bars2 {
 }
 #toggle_cat_bar,
 #toggle_time_bar,
+#toggle_days_bar,
 .clickme {
     text-decoration: underline;
     cursor: pointer;
