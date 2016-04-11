@@ -1,15 +1,15 @@
 # TODO
 
 BACK-END
-* for time of day and day of week, the order of values should be fixed
 * make heatmaps align with map
+* for time of day and day of week, the _order_ of values should be fixed
 
 FRONT-END
 
 * make interface a little nicer
--- put selection menus in different lines
 -- make plots a little shorter
--- add footer with links to front page and about page
+-- put selection menus in different lines DONE
+-- add footer with links to front page and about page DONE
 * For some reason the map always centers where it wants to,
 	cannot pull it elsewhere, and it is not always well centered
 	edit: it gets movable after zooming, maybe that's ok

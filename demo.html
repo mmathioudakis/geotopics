@@ -32,26 +32,26 @@
     </div>
     <div id='main-right'>
         <form id="formui">
-            <p>
-            <label for="feature">See <span class="hide_on_mobile">what is </span>the most </label>
+            <p style="background-color: ##b3d4fc;">
+            <label for="feature">See <span class="hide_on_mobile">what is&nbsp;</span>the most </label>
             <select onchange="update_overlay_url(true);" id="feature" name="feature">
-                <option value="cat_likely" selected>likely Category</option>
-                <option value="cat_distinct">distinctive Category</option>
-                <option value="time_likely">likely Time of Day</option>
-                <option value="time_distinct">distinctive Time of Day</option>
-                <option value="day_likely">likely Day of Week</option>
-                <option value="day_distinct">distinctive Day of Week</option>
+                <option value="cat_likely" selected>likely category</option>
+                <option value="cat_distinct">distinctive category</option>
+                <option value="time_likely">likely time of day</option>
+                <option value="time_distinct">distinctive time of day</option>
+                <option value="day_likely">likely day of week</option>
+                <option value="day_distinct">distinctive day of week</option>
             </select>
-            <span class="hide_on_mobile">of each cell </span>in the city <span id="focus">(
-                <label for="feature_value">and focus on&nbsp;</label>
+            <span class="hide_on_mobile">of each location&nbsp;</span>in the city;</p>
+            <p> <span id="focus"><label for="feature_value">focus on&nbsp;</label>
             <select onchange="update_overlay_url(false);" id='feature_value' name="feature_value">
-            </select>).
+            </select>;
             </span>
-            <!-- TODO it looks better with two paragraphs but long feature names take too much space
+            <!-- TODO it looks better with three paragraphs but long feature names take too much space
+            -->
             </p>
             <p>
-            -->
-            <label for="neighborhoods_select">Or explore&nbsp;</label>
+            <label for="neighborhoods_select">or explore&nbsp;</label>
             <select onchange="display_region();" name="neighborhoods" id="neighborhoods"></select><span id="theta"></span>
             </p>
         </form>
