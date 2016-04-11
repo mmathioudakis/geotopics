@@ -16,7 +16,7 @@ var urlParams;
         urlParams[decode(match[1])] = decode(match[2]);
 })();
 // TODO is 18 a good choice?
-var max_region = urlParams.max_region ? parseInt(urlParams.max_region) : 18;
+var max_regions = urlParams.max_regions ? parseInt(urlParams.max_regions) : 6;
 
 // loading minified
 // see http://minifiedjs.com/docs/quickstart.html
@@ -97,7 +97,7 @@ function init() {
   map.fitBounds([[minx-2, miny-2], [maxx+2, maxy+2]], {maxZoom: 18});
 }
 function resize_map(e) {
-  setFullScreen();
+  // setFullScreen();
   var chosen_city = e===null ? $('#city').get('value') : e.target.city;
   var raw = CITY_BOUNDS[chosen_city];
   $("#city").set({value: chosen_city});
@@ -438,7 +438,7 @@ function show_regions(city) {
           .on('mouseover', region_in, [i])
           .on('mouseout', region_out, [i]));
         i = i + 1;
-        if (i > max_region) { break; }
+        if (i > max_regions) { break; }
       }
       regions_layer = L.layerGroup(allRegions);
       $('#neighborhoods').fill(list_elems);
