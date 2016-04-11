@@ -81,7 +81,8 @@ svg#bars, svg#bars2 {
     font-size: 14px;
 }
 #toggle_cat_bar,
-#toggle_time_bar {
+#toggle_time_bar,
+#legend li {
     text-decoration: underline;
     cursor: pointer;
 }

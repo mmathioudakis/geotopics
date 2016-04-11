@@ -384,7 +384,11 @@ function display_legend(raw) {
   var li = legend.selectAll('li')
     .data(data)
     .enter()
-    .append('li');
+    .append('li')
+    .on('click', function legend_click(d) {
+      $('#feature_value').set({value: d.name.replace(/\s/g, '')});
+      update_overlay_url(false);
+    });
   li.append('div')
     .style("background-color", function (d) {return d.color;});
   li.append('span')
