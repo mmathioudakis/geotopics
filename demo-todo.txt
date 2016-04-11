@@ -1,0 +1,19 @@
+# TODO
+
+BACK-END
+* add more features for individual values -- just add manually some by default
+* for time of day and day of week, the order and set of values should be fixed
+
+FRONT-END
+* remove maps for distinctive values, keep only for likely (the information is not differrent)
+* add dayOfWeek stats
+* keep only some of the cities
+* keep only 5-6 regions by default
+* add 'about' page
+-- names
+-- short description
+-- other credits (tools and funding)
+* make interface a little nicer
+-- put selections in different lines
+
+DONE * figure out what's wrong with new york and other cities
