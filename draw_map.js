@@ -386,6 +386,7 @@ function display_legend(raw) {
     .data(data)
     .enter()
     .append('li')
+    .attr('class', 'clickme')
     .on('click', function legend_click(d) {
       $('#feature_value').set({value: d.name.replace(/\s/g, '')});
       update_overlay_url(false);

@@ -82,7 +82,7 @@ svg#bars, svg#bars2 {
 }
 #toggle_cat_bar,
 #toggle_time_bar,
-#legend li {
+.clickme {
     text-decoration: underline;
     cursor: pointer;
 }
