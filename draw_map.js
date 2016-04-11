@@ -344,6 +344,7 @@ function update_overlay_url(main) {
     map.addLayer(overlay_info.layer);
   }
   if (overlay_info.url !== null && overlay_info.url !== image_url) {
+    overlay_info.url = image_url;
     overlay_info.layer.setUrl(image_url);
   }
 }
