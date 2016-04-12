@@ -103,7 +103,7 @@ function resize_map(e) {
   $("#city").set({value: chosen_city});
   $('#main-left').set({$width: '55%'});
   $('#main-right').set({$display: 'block'});
-  $('#map').set({$height: '80%'});
+  $('#map').set({$height: '83%'});
   map.invalidateSize();
   //TODO this leave the popups in place, maybe better to set them to null as well?
   map.removeLayer(initial_city_markers);
@@ -118,10 +118,10 @@ function set_x_axis(svg, x, y, axis) {
     .attr("transform", "translate(" + x + "," + y + ")")
     .call(axis)
     .selectAll("text")
-    .attr("y", 0)
+    .attr("y", 5)
     .attr("x", -10)
     .attr("dy", 5)
-    .attr("transform", "rotate(-45)")
+    .attr("transform", "rotate(-30)")
     .style("text-anchor", "end");
 }
 
@@ -229,7 +229,7 @@ function display_region() {
     svg3.selectAll("*").remove();
   }
   var bounding_rect = svg.node().getBoundingClientRect();
-  var margin = { t: 25, r: 10, b: 75, l: 60 };
+  var margin = { t: 50, r: 25, b: 100, l: 80 };
   if (smallScreen) {margin = {t: 20, r: 5, b: 60, l: 30 };}
   var  w = bounding_rect.width - margin.l - margin.r,
     h = bounding_rect.height - margin.t - margin.b;
@@ -248,20 +248,20 @@ function display_region() {
   var colors_time = function (i) {
     return ["#fee391","#fec44f","#fe9929","#ec7014","#cc4c02","#993404","#662506"][i];
   }
-  var end_axis = smallScreen ? bounding_rect.width - margin.r : bounding_rect.width/2;
+  var end_axis = smallScreen ? bounding_rect.width - margin.r : bounding_rect.width/2.15 - margin.r;
   var xScale_time = d3.scale.ordinal()
     .domain(timeOfDay)
-    .rangeRoundBands([margin.l, end_axis], 0.1, 0.15);
+    .rangeRoundBands([margin.l, end_axis], 0.15, 0.1);
   var xAxis_time = d3.svg.axis()
     .scale(xScale_time)
     .orient("bottom");
   var colors_day = function(i) {
     return ["#ccece6","#99d8c9","#66c2a4","#41ae76","#238b45","#006d2c","#00441b"][i];
   }
-  var begin_axis = smallScreen ? margin.l : bounding_rect.width/2 + margin.l;
+  var begin_axis = smallScreen ? margin.l : bounding_rect.width/2.15 + margin.l;
   var xScale_day = d3.scale.ordinal()
     .domain(dayOfWeek)
-    .rangeRoundBands([begin_axis, bounding_rect.width - margin.r], 0.1, 0.15);
+    .rangeRoundBands([begin_axis, bounding_rect.width - margin.r], 0.15, 0.1);
   var xAxis_day = d3.svg.axis()
     .scale(xScale_day)
     .orient("bottom");
@@ -282,7 +282,7 @@ function display_region() {
     margin, xScale_time, timeOfDay, colors_time, feature.properties.time_more, false
   );
   draw_bars(smallScreen ? svg3 : svg, feature.properties.days_distrib,
-      'days_bar', 20+(smallScreen ? 0 : bounding_rect.width/2), height, margin, xScale_day,
+      'days_bar', 20+(smallScreen ? 0 : bounding_rect.width/2.15), height, margin, xScale_day,
       dayOfWeek, colors_day, feature.properties.days_more, false);
   // TODO: display two sentences highlighting most frequent category and timeOfDay? (no more space!)
 }

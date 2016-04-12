@@ -6,11 +6,13 @@ body {
 	padding: 0;
 	color: #333;
 	background-color: #fcf8fc;
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 14pt;
 }
 #title {
 	width: 80%;
-	margin: .7rem auto;
-	font-size: 130%;
+	margin: 1.2rem auto;
+	font-size: 150%;
 	font-weight: bold;
 	text-align: center;
 }
@@ -19,8 +21,8 @@ body {
 }
 #main-left, #main-right {
 	position: absolute;
-	height: 95%;
-	top: 5%;
+	height: 91%;
+	top: 9%;
 	margin: 0;
 	padding: 0;
 }
@@ -35,7 +37,7 @@ body {
 }
 #map {
 	width: 100%;
-	height: 95%; /* 80% */
+	height: 95%; /* 83% */
 	background-color: #fcf8fc;
 }
 .meaningful {
@@ -58,7 +60,7 @@ body {
 
 svg#bars, svg#bars2, svg#bars3 {
     width: 100%;
-    height: 91%;
+    height: 82%;
 }
 #bars2, #bars3 {display: none;}
 .arrow {
@@ -78,7 +80,7 @@ svg#bars, svg#bars2, svg#bars3 {
 
 .axis text {
     font-family: sans-serif;
-    font-size: 14px;
+    font-size: 16px;
 }
 #toggle_cat_bar,
 #toggle_time_bar,
