@@ -1,13 +1,12 @@
 # TODO
 
 BACK-END
-* make heatmaps align with map
-* for time of day and day of week, the _order_ of values should be fixed
 
 FRONT-END
 
 * make interface a little nicer
 -- make plots a little shorter
+-- for time of day and day of week, the _order_ of values should be fixed
 -- put selection menus in different lines DONE
 -- add footer with links to front page and about page almost-DONE, not working for front page
 * For some reason the map always centers where it wants to,
@@ -28,4 +27,4 @@ DONE * add 'about' page
 	-- names
 	-- short description
 	-- other credits (tools and funding)
-
+DONE * make heatmaps align with map -- SOLUTION: re-compute the city bounds
