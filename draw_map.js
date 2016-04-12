@@ -154,6 +154,7 @@ function draw_bars(svg, full_data, className, y_pos, h, margin, xscale, labels,
     .attr("x", function (d, i) { return xscale(labels[i]) + xscale.rangeBand() / 2; })
     // TODO put text below with appropriate color http://stackoverflow.com/a/3943023
     .attr("y", function (d) { return yscale(d) - 5; })
+    .attr("style", function(){return "font-size: 0.7em;"})
     .attr("text-anchor", "middle");
   if (smallScreen) {
     var tip = parseInt(xscale.rangeExtent()[1]);
@@ -370,18 +371,77 @@ function update_overlay_url(main) {
   }
 }
 
+function day_val(x) {
+  switch (x.toLowerCase()) {
+    case "monday":
+      return 0;
+      break;
+    case "tuesday":
+      return 1;
+      break;
+    case "wednesday":
+      return 2;
+      break;
+    case "thursday":
+      return 3;
+      break;
+    case "friday":
+      return 4;
+      break;
+    case "saturday":
+      return 5;
+      break;
+    case "sunday":
+      return 6;
+      break;
+    case "morning":
+      return 0;
+      break;
+    case "noon":
+      return 1;
+      break;
+    case "afternoon":
+      return 2;
+      break;
+    case "evening":
+      return 3;
+      break;
+    case "night":
+      return 4;
+      break;
+        case "latenight":
+      return 5;
+      break;
+    default :
+      return 100;
+      break;
+  }
+}
+
+function compare_days(a, b) {
+  return day_val(a) - day_val(b);
+}
+
 function list_feature_values(result) {
   d3.select('#feature_value').selectAll('option').remove(); // empty first
   // parse json to extract feature values
   var raw = $.parseJSON(result);
-  var list_elems = [EE('option', {}, "a specific value"),];
+  var my_array = [];
   for (var cat in raw) {
+    my_array.push(cat);
+  }
+  my_array.sort(compare_days);
+  console.log(my_array);
+  var list_elems = [EE('option', {}, "a specific value"),];
+  for (var i in my_array) {
+    console.log(my_array[i]);
+    cat = my_array[i];
     list_elems.push(EE('option', {'@title': cat.toTitleCase(), value: cat.replace(/\s/g, '')}, add_ellipsis(cat.toLowerCase())));
   }
   $('#feature_value').fill(list_elems);
   $('#focus').set({$display: 'inline'});
   // TODO bad coupling, but why make 2 requests and parse json 2 times?
-  display_legend(raw);
+  display_legend(raw, my_array);
 }
 function show_heatmap(city) {
   update_overlay_url(true);
@@ -395,10 +455,11 @@ function layer_turned_off(layer) {
   if (layer.name === "Regions") { $('#bars').set({$display: "none"}); }
   if (layer.name === "Heatmap") { $('#legend').set({$display: "none"}); }
 }
-function display_legend(raw) {
+function display_legend(raw, sorted_array) {
   // var raw = $.parseJSON(result);
   var data = [];
-  for (var cat in raw) {
+  for (var i in sorted_array) {
+    cat = sorted_array[i];
     data.push({"name": cat, "color": d3.rgb(raw[cat][0]*255, raw[cat][1]*255, raw[cat][2]*255).toString()});
   }
   d3.select('#legend').selectAll("li").remove();

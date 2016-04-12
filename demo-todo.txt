@@ -4,16 +4,12 @@ BACK-END
 
 FRONT-END
 
-* make interface a little nicer
--- make plots a little shorter
--- for time of day and day of week, the _order_ of values should be fixed
--- put selection menus in different lines DONE
--- add footer with links to front page and about page almost-DONE, not working for front page
 * For some reason the map always centers where it wants to,
 	cannot pull it elsewhere, and it is not always well centered
 	edit: it gets movable after zooming, maybe that's ok
 * keep only some of the cities
 * expand about page
+* add footer
 
 DONE * figure out what's wrong with new york and other cities
 DONE * Remove fullscreen by default, at least for the demo? :)
@@ -28,3 +24,8 @@ DONE * add 'about' page
 	-- short description
 	-- other credits (tools and funding)
 DONE * make heatmaps align with map -- SOLUTION: re-compute the city bounds
+DONE * make interface a little nicer
+-- for time of day and day of week, the _order_ of values should be fixed
+-- make region plot text (bar values) smaller
+-- put selection menus in different lines
+-- make plots a little shorter
