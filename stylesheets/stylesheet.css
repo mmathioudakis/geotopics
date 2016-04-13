@@ -347,10 +347,14 @@ footer a:hover {
   -moz-column-count: 2;
 }
 #archi {
-  width: 1200px !important;
-  max-width: 1200px !important;
-  margin-left: -312px;
   box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+}
+@media only screen and (min-width: 1250px) {
+  #archi {
+    width: 1200px;
+    max-width: none !important;
+    margin-left: -312px;
+  }
 }
 #demo {
   background-color: rgba(33, 150, 243, 0.2);
