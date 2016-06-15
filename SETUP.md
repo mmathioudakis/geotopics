@@ -161,5 +161,5 @@ print("In normalized scale, the first region is centered at {}".format(region_0_
 print("In normalized scale, the covariance matrix for its gaussian is\n{}.".format(region_0_covar))
 ```
 
-**TODO** provide usage example for the scaler.***
+**TODO** provide usage example for the scaler and how to output an image.***
 
