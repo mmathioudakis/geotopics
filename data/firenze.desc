@@ -1,0 +1,4 @@
+Number of points for training: 265
+Number of topics: 8
+Features: ['primCategory', 'dayOfWeek', 'timeOfDay', 'user']
+Query: {"city":"Firenze"}
