@@ -2,21 +2,23 @@
 The following instructions have been tried on OSX 10.11.5.
 Setup on other platforms should be quite similar.
 
-The technical details are described in this [pre-print article](http://arxiv.org/abs/1604.04649) on arXiv.
+The technical details are described in our arXiv preprint
+[Extracting Patterns of Urban Activity from Geotagged Social Data](http://arxiv.org/abs/1604.04649).
+
 
 # Requirements
 
-Below we list the software required to run the code, along with the version for which it was tested.
+Below we list the software required to run the code, along with the version for which it was successfully tested.
 
 * python 3.5
 * mongodb 3.2.3 [download the community version](https://www.mongodb.com/download-center?jmp=nav#community)
-* anakonda 4.0.8 for python 3.5 [download](https://www.continuum.io/downloads)
-* other python libraries: delorean 0.6.0, persistent 4.2.1
-These libraries are installed with the following command.
+* anaconda 4.0.8 for python 3.5 [download](https://www.continuum.io/downloads)
+* additional python library: delorean 0.6.0
+This library can be installed by running the following command:
 
-> pip install delorean persistent
+> pip install delorean
 
-If you do not have pip, you can install it using these [official instructions](https://pip.pypa.io/en/stable/installing/).
+If you do not have pip, you can install it using [the official instructions](https://pip.pypa.io/en/stable/installing/).
 
 
 
