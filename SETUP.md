@@ -164,4 +164,13 @@ print("In normalized scale, the covariance matrix for its gaussian is\n{}.".form
 
 To visualize the results, see the [Jupyter](http://jupyter.org/) notebook [visualize.ipynb](http://nbviewer.jupyter.org/github/mmathioudakis/geotopics/blob/master/visualize.ipynb).
 
+Alternatively, run the **visualize.py** script.
+```
+python3 visualize.py firenze
+```
+Note that to run the visualization script, you need to:
+* provide the city as parameter ('firenze', here),
+* obtain an access token from MapBox and set it as **MAPBOX_ACCESS_TOKEN** environment variable -- to do that, simply follow the [official Mapbox instructions](https://www.mapbox.com/developers/).
+
+The output of the script is a set of images and plots stored under the 'data/' folder.
 
