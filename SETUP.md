@@ -11,10 +11,10 @@ Below we list the software required to run the code, along with the version for 
 * python 3.5
 * mongodb 3.2.3 [download the community version](https://www.mongodb.com/download-center?jmp=nav#community)
 * anakonda 4.0.8 for python 3.5 [download](https://www.continuum.io/downloads)
-* other python libraries: delorean 0.6.0, persistent 4.2.1
+* other python libraries: delorean 0.6.0, persistent 4.2.1, mapbox 0.9.0
 These libraries are installed with the following command.
 
-> pip install delorean persistent
+> pip install delorean persistent mapbox
 
 If you do not have pip, you can install it using these [official instructions](https://pip.pypa.io/en/stable/installing/).
 
@@ -160,6 +160,17 @@ region_0_covar = model.topic_covar[0]
 print("In normalized scale, the first region is centered at {}".format(region_0_center))
 print("In normalized scale, the covariance matrix for its gaussian is\n{}.".format(region_0_covar))
 ```
+## Visualizing the results
 
-**TODO** provide usage example for the scaler and how to output an image.***
+To visualize the results, see the [Jupyter](http://jupyter.org/) notebook [visualize.ipynb](http://nbviewer.jupyter.org/github/mmathioudakis/geotopics/blob/master/visualize.ipynb).
+
+Alternatively, run the **visualize.py** script.
+```
+python3 visualize.py firenze
+```
+Note that to run the visualization script, you need to:
+* provide the city as parameter ('firenze', here),
+* obtain an access token from MapBox and set it as **MAPBOX_ACCESS_TOKEN** environment variable -- to do that, simply follow the [official Mapbox instructions](https://www.mapbox.com/developers/).
+
+The output of the script is a set of images and plots stored under the 'data/' folder.
 
