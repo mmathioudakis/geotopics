@@ -96,6 +96,9 @@ def parse_args():
     parser.add_argument('-verbose', type=int, default=1,
         help = "Verbosity level 0-2, higher is more verbose.")
 
+    parser.add_argument('-description', default = "train_results",
+        help = "filename prefix for result files")
+
     return parser.parse_args(), parser
 
 
@@ -104,7 +107,8 @@ def main():
     args, parser = parse_args()
 
     # Get current time to use it as a filename for output files
-    filename_prefix = datetime.today().strftime("%d-%m-%Y-%H.%M.%S")
+    filename_prefix = args.description
+    # filename_prefix = datetime.today().strftime("%d-%m-%Y-%H.%M.%S")
     if args.city:
         external = args.external or str(args.k_min)
         city = args.city
