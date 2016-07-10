@@ -101,16 +101,17 @@ The data are stored in a database named 'firenze_db' and in two collections, 'ch
 
 To train a model on the data, issue a command like the following.
 > python3.5 -W ignore train.py -k_min 1 -k_step 1 -k_max 15 --runs 10 --iter 100 \
->    --save mongo --dbname firenze_db --query '{"city":"Firenze"}'
+>    --save mongo --dbname firenze_db --query '{"city":"Firenze"}' -description firenze
 
 The specified parameters have the following meaning.
 * '-W ignore': do not print warnings. If not included, several numberical warnings are printed, which are however dealt with in the code.
 * '-k_min', '-k_max', '-k_step': the minimum, maximum, and increment of the number $k$ of regions to be learned by the model.
-* '-runs': the number of random parameter initializations tried for each value of $k$,
-* '-iter': the number of EM iterations,
-* '--save': directive to save the results in a file
-* '--dbname': the name of the database that stores the Foursquare data
+* '-runs': the number of random parameter initializations tried for each value of $k$.
+* '-iter': the number of EM iterations.
+* '--save': directive to save the results in a file.
+* '--dbname': the name of the database that stores the Foursquare data.
 * '--query': the subset of the checkins on which to run the model.
+* '-description': the prefix of the result filenames.
 
 
 The above outputs files with filenames of the following form,
@@ -123,7 +124,7 @@ where [date] is the timestamp when the program terminated.
 
 ## Loading the results
 
-For this example, we have renamed all the result files so as to have 'firenze' as prefix. The filenames are:
+For this example, all result files have 'firenze' as prefix. The filenames are:
 
 ```
 firenze.desc,
