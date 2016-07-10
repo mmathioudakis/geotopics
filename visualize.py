@@ -16,7 +16,7 @@ import mapbox
 import matplotlib.image as mpimg
 import os
 import argparse
-
+import zipfile
 
 def iter_region_distribution_and_geo(model, cat_idx_to_main_idx,
                                      timeOfDay_order, dayOfWeek_order):
@@ -173,36 +173,39 @@ if __name__ == '__main__':
         key = lambda x: x[1]['properties']['weight'],
         reverse = True)[:MAX_REGIONS]
 
-    for region_id, res in results:
-        stats = res['properties']
-        
-        fig, ax = plt.subplots(1, 4, figsize = (21, 6))
-        fig.suptitle("{} - Weight: {}%".format(stats['name'],
-            int(100 * stats['weight'])), size = 18)
-        
-        ax[0].set(title = stats['name'])
-        response = mapbox_service.image('mapbox.streets',
-            features=[a['features'][region_id]])
-        with open('/tmp/map.png', 'wb') as output:
-            _ = output.write(response.content)
-        img = mpimg.imread('/tmp/map.png')
-        ax[0].axis('off')
-        ax[0].imshow(img);
-        
-        
-        ax[1].set(title = 'Category')
-        ax[1].bar(range(len(mainCats) - 1),
-            stats['category_distrib'], tick_label = main_cats_plot,
-                  color = cat_colors, align = 'center')
-        
-        ax[2].set(title = 'Days of Week')
-        ax[2].bar(range(len(dayOfWeek)), stats['days_distrib'],
-            tick_label = dayOfWeek_plot,
-                  color = day_colors, align = 'center')
-        
-        ax[3].set(title = 'Time of Day')
-        ax[3].bar(range(len(timeOfDay)), stats['time_distrib'],
-            tick_label = timeOfDay_plot,
-                  color = time_colors, align = 'center')
+    with zipfile.ZipFile(city + '.zip', 'w') as myzip:
+        for region_id, res in results:
+            stats = res['properties']
+            
+            fig, ax = plt.subplots(1, 4, figsize = (21, 6))
+            fig.suptitle("{} - Weight: {}%".format(stats['name'],
+                int(100 * stats['weight'])), size = 18)
+            
+            ax[0].set(title = stats['name'])
+            response = mapbox_service.image('mapbox.streets',
+                features=[a['features'][region_id]])
+            with open('/tmp/map.png', 'wb') as output:
+                _ = output.write(response.content)
+            img = mpimg.imread('/tmp/map.png')
+            ax[0].axis('off')
+            ax[0].imshow(img);
+            
+            
+            ax[1].set(title = 'Category')
+            ax[1].bar(range(len(mainCats) - 1),
+                stats['category_distrib'], tick_label = main_cats_plot,
+                      color = cat_colors, align = 'center')
+            
+            ax[2].set(title = 'Days of Week')
+            ax[2].bar(range(len(dayOfWeek)), stats['days_distrib'],
+                tick_label = dayOfWeek_plot,
+                      color = day_colors, align = 'center')
+            
+            ax[3].set(title = 'Time of Day')
+            ax[3].bar(range(len(timeOfDay)), stats['time_distrib'],
+                tick_label = timeOfDay_plot,
+                      color = time_colors, align = 'center')
 
-        fig.savefig(FOLDER + city + "_" + stats['name'] + ".png")
+            fig_filename = FOLDER + city + "_" + stats['name'] + ".png"
+            fig.savefig(fig_filename)
+            myzip.write(fig_filename)
