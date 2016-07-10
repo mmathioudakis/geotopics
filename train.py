@@ -107,7 +107,7 @@ def main():
     args, parser = parse_args()
 
     # Get current time to use it as a filename for output files
-    filename_prefix = args.description
+    filename_prefix = "data/" + args.description
     # filename_prefix = datetime.today().strftime("%d-%m-%Y-%H.%M.%S")
     if args.city:
         external = args.external or str(args.k_min)
