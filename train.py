@@ -33,39 +33,29 @@ def parse_args():
 
     # Data source. Mutually exclusive commands:
     # It's either Mongo or our CSV files.
-    datasource_subparsers = parser.add_subparsers(dest="datasource")
+    # datasource_subparsers = parser.add_subparsers(dest="datasource")
 
-    mongo_parser = datasource_subparsers.add_parser("mongo")
-    mongo_parser.add_argument('--dbhost', 
+    # mongo_parser = datasource_subparsers.add_parser("mongo")
+    parser.add_argument('--dbhost', 
         help='Address of MongoDB server', default="127.0.0.1")
-    mongo_parser.add_argument('--dbport',
+    parser.add_argument('--dbport',
         help='Port of MongoDB server', type=int, default=27017)
-    mongo_parser.add_argument('--dbname', '-n',
+    parser.add_argument('--dbname', '-n',
         help='Database name', type=str, required=True)
-    mongo_parser.add_argument('--username',
+    parser.add_argument('--username',
         help='Database user', default=None)
-    mongo_parser.add_argument('--password',
+    parser.add_argument('--password',
         help='Password for the user', default=None)
-    mongo_parser.add_argument('--checkincoll', '-c',
+    parser.add_argument('--checkincoll', '-c',
         help='Collection name of venue data', default="checkins")
-    mongo_parser.add_argument('--venuecoll', '-v',
+    parser.add_argument('--venuecoll', '-v',
         help='Collection name of venue data', default="venues")
-    mongo_parser.add_argument('--venue_threshold', '-t', type=int, 
+    parser.add_argument('--venue_threshold', '-t', type=int, 
         help='Keep only venues with that number of checkins', default=0)
-    mongo_parser.add_argument('--query', '-q', 
+    parser.add_argument('--query', '-q', 
         help='MongoDB query to filter venues that will be loaded',
         default=None)
-    mongo_parser.add_argument('--city', '-y', help='City to train on')
-
-    # TODO remove this parser
-    file_parser = datasource_subparsers.add_parser("file")
-    file_parser.add_argument('--datafile', '-d',
-        help='Filename for data points.')
-
-    # TODO remove this parser
-    file_adv_parser = datasource_subparsers.add_parser("file_advanced")
-    file_adv_parser.add_argument('--datafile', '-d',
-        help='Filename for data points.')
+    parser.add_argument('--city', '-y', help='City to train on')
 
     parser.add_argument('-k_min', type=int, default=1,
         help = 'Number of topics to look for.')
@@ -106,6 +96,9 @@ def parse_args():
     parser.add_argument('-verbose', type=int, default=1,
         help = "Verbosity level 0-2, higher is more verbose.")
 
+    parser.add_argument('-description', default = "train_results",
+        help = "filename prefix for result files")
+
     return parser.parse_args(), parser
 
 
@@ -113,39 +106,30 @@ def main():
     import persistent as p
     args, parser = parse_args()
 
-    if args.datasource == "mongo":
-        # Get current time to use it as a filename for output files
-        filename_prefix = datetime.today().strftime("%d-%m-%Y-%H.%M.%S")
-        if args.city:
-            external = args.external or str(args.k_min)
-            city = args.city
-            filename_prefix = '_'.join([city, external, str(args.n_components)])
-            filename_prefix = 'comparisons/' + filename_prefix
-            args.query = '{{"bboxCity": "{}"}}'.format(args.city)
+    # Get current time to use it as a filename for output files
+    filename_prefix = "data/" + args.description
+    # filename_prefix = datetime.today().strftime("%d-%m-%Y-%H.%M.%S")
+    if args.city:
+        external = args.external or str(args.k_min)
+        city = args.city
+        filename_prefix = '_'.join([city, external, str(args.n_components)])
+        filename_prefix = 'comparisons/' + filename_prefix
+        args.query = '{{"bboxCity": "{}"}}'.format(args.city)
 
-        # connect to mongo, load and standardize data
-        db = get_mongo_database_with_auth(args.dbhost, args.dbport, args.dbname,
-            args.username, args.password)
+    # connect to mongo, load and standardize data
+    db = get_mongo_database_with_auth(args.dbhost, args.dbport, args.dbname,
+        args.username, args.password)
 
-        # TODO: Get this from command line
-        venue_extractors = [io.venue_primary_category_extractor]
-        checkin_extractors = [io.checkin_time_extractor_hard,
-                        io.checkin_user_extractor, io.checkin_day_extractor]
+    # TODO: Get this from command line
+    venue_extractors = [io.venue_primary_category_extractor]
+    checkin_extractors = [io.checkin_time_extractor_hard,
+                    io.checkin_user_extractor, io.checkin_day_extractor]
 
-        data, scaler = io.load_data_mongo(db[args.venuecoll],
-            db[args.checkincoll], args.query, venue_extractors,
-            checkin_extractors, filename_prefix, args.n_components,
-            args.venue_threshold)
-        
-    elif args.datasource == "file":
-        # load data from a CSV file
-        data, scaler = io.load_data_csv(args.datafile)  # 1 x N
-    elif args.datasource == "file_advanced":
-        # load data from a CSV file
-        data, scaler = io.load_data_csv_advanced(args.datafile)  # 1 x N
-    else:
-        parser.print_help(file=sys.stderr)
-        sys.exit(0)
+    data, scaler = io.load_data_mongo(db[args.venuecoll],
+        db[args.checkincoll], args.query, venue_extractors,
+        checkin_extractors, filename_prefix, args.n_components,
+        args.venue_threshold)
+
 
     # Split into train and test
     train, test = io.split_train_test_with_common_vocabulary(data,

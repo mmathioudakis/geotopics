@@ -90,7 +90,8 @@ def load_data_csv_advanced(datafile):
 
 def fetch_data_from_mongo(venue_collection, checkin_collection, venue_filter_query,
                           venue_feature_extractors, checkin_feature_extractors,
-                          min_number_of_checkins=0):
+                          venue_threshold=0):
+    print(venue_filter_query)
     venue_filter_query_json = json.loads(venue_filter_query)
 
     data = {"coordinates": []}
@@ -101,12 +102,11 @@ def fetch_data_from_mongo(venue_collection, checkin_collection, venue_filter_que
 
     venue_cursor = venue_collection.find(venue_filter_query_json)
 
-    venue_num = 0
     num_checkins = 0
     venues = [venue for venue in venue_cursor
-              if len(list(checkin_collection.find({"venueId": venue["_id"]}))) >= min_number_of_checkins]
+              if len(list(checkin_collection.find({"venueId": venue["_id"]}))) >= venue_threshold]
     num_elems = len(venues)
-    for venue in venues:
+    for venue_num, venue in enumerate(venues):
         if venue_num % 2000 == 0: print("Processing venue number {0}/{1}.".format(venue_num, num_elems),
                                         file=sys.stderr)
 
@@ -135,7 +135,6 @@ def fetch_data_from_mongo(venue_collection, checkin_collection, venue_filter_que
 
                     data[key][venue_num] += words
 
-        venue_num += 1
 
     print("Found {0} checkins in total.".format(num_checkins))
 
