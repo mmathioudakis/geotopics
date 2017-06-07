@@ -85,6 +85,7 @@ class Model:
             self.eta_penalty_history = []
 
         self.latest_statistics = None
+        self.venue_ids = None
 
     def fit(self, train_data):
         # Reset tracking
@@ -106,6 +107,7 @@ class Model:
 
         # MODEL PARAMETER INITIALIZATION =======================
         self.num_points = train_data["coordinates"].shape[0]
+        self.venue_ids = train_data['venue_ids']
 
         # Initialize geographical parameters
         if self.topic_centers is None:
@@ -123,7 +125,8 @@ class Model:
         #                      (self.num_points, self.num_topics))
 
         # Unigram frequencies and deviations
-        features = (feature for feature in train_data.keys() if feature not in ["coordinates", "counts", "unigrams"])
+        features = (feature for feature in train_data.keys()
+                    if feature not in ["coordinates", "counts", "unigrams", 'venue_ids'])
 
         for feature in features:
             num_unigrams = len(train_data["unigrams"][feature])
@@ -202,7 +205,7 @@ class Model:
         return ModelParameters(self.num_topics, self.num_points,
                                self.theta, self.phi,
                                self.m_arrays, self.h_arrays, self.beta_arrays,
-                               self.topic_centers, self.topic_covar)
+                               self.topic_centers, self.topic_covar, self.venue_ids)
 
     def get_statistics_history(self):
         if self.track_params:

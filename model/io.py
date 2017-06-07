@@ -7,8 +7,10 @@ from datetime import timedelta
 import pandas as pd
 from delorean import epoch
 from scipy import sparse
-from sklearn import cross_validation
+from sklearn.model_selection import train_test_split, ShuffleSplit
 from sklearn.preprocessing import StandardScaler
+from operator import itemgetter
+import tqdm
 
 from model.model import Model
 
@@ -91,7 +93,6 @@ def load_data_csv_advanced(datafile):
 def fetch_data_from_mongo(venue_collection, checkin_collection, venue_filter_query,
                           venue_feature_extractors, checkin_feature_extractors,
                           venue_threshold=0):
-    print(venue_filter_query)
     venue_filter_query_json = json.loads(venue_filter_query)
 
     data = {"coordinates": []}
@@ -106,10 +107,9 @@ def fetch_data_from_mongo(venue_collection, checkin_collection, venue_filter_que
     venues = [venue for venue in venue_cursor
               if len(list(checkin_collection.find({"venueId": venue["_id"]}))) >= venue_threshold]
     num_elems = len(venues)
-    for venue_num, venue in enumerate(venues):
-        if venue_num % 2000 == 0: print("Processing venue number {0}/{1}.".format(venue_num, num_elems),
-                                        file=sys.stderr)
-
+    venues.sort(key=itemgetter('_id'))
+    data['venue_ids'] = np.array([str(v['_id']) for v in venues])
+    for venue_num, venue in enumerate(tqdm.tqdm(venues, desc='gathering checkins per venue', unit='venue')):
         data["coordinates"].append(venue["coordinates"])
 
         venueId = venue["_id"]
@@ -165,10 +165,12 @@ def sparsify_data(data: dict, filename_prefix: str, num_svd_components: int):
     :param data:
     :return:
     """
-    sparsified = {"coordinates": data["coordinates"], "unigrams": {}, "counts": {}}
+    sparsified = {"coordinates": data["coordinates"], "unigrams": {}, "counts": {},
+                  'venue_ids': data['venue_ids']}
 
     # Construct sparse matrices
-    features = (feature for feature in data.keys() if feature not in ["coordinates", "counts", "unigrams"])
+    features = (feature for feature in data.keys()
+                if feature not in ["coordinates", "counts", "unigrams", 'venue_ids'])
 
     for feature in features:
         counter = Counter([item for sublist in data[feature] for item in sublist])  # Flatten the list
@@ -233,22 +235,27 @@ def split_train_test_with_common_vocabulary(sparse_data: dict, test_size: float)
     # seed = random.randint(0, 2 ** 32)
     # TODO: Enable
     seed = 1
+    rs = ShuffleSplit(1, test_size, random_state=seed)
 
     train = {"unigrams": sparse_data["unigrams"], "counts": {}}
     test = {"unigrams": sparse_data["unigrams"], "counts": {}}
 
-    coordinates_train, coordinates_test = cross_validation.train_test_split(sparse_data["coordinates"],
-                                                                            test_size=test_size,
-                                                                            random_state=seed)
+    coordinates_train, coordinates_test = train_test_split(sparse_data["coordinates"],
+                                                           test_size=test_size,
+                                                           random_state=seed)
+    train_idx, test_idx = next(rs.split(sparse_data['coordinates']))
 
-    train["coordinates"] = coordinates_train
-    test["coordinates"] = coordinates_test
+    train["coordinates"] = sparse_data['coordinates'][train_idx, :]
+    train['venue_ids'] = sparse_data['venue_ids'][train_idx]
+    test["coordinates"] = sparse_data['coordinates'][test_idx, :]
+    test['venue_ids'] = sparse_data['venue_ids'][test_idx]
 
-    features = (feature for feature in sparse_data.keys() if feature not in ["coordinates", "counts", "unigrams"])
+    features = (feature for feature in sparse_data.keys()
+                if feature not in ["coordinates", "counts", "unigrams", 'venue_ids'])
 
     for feature in features:
-        sparse_train, sparse_test = cross_validation.train_test_split(sparse_data[feature], test_size=test_size,
-                                                                      random_state=seed)
+        sparse_train, sparse_test = train_test_split(sparse_data[feature], test_size=test_size,
+                                                     random_state=seed)
         train[feature] = sparse_train
         test[feature] = sparse_test
 
@@ -324,13 +331,13 @@ def checkin_user_extractor(checkin_entry):
 def save_model(model: Model, scaler: StandardScaler, query: str, unigrams: dict, filename_prefix: str,
                per_point_test_likelihood=None):
     with open(filename_prefix + ".mdl", "wb") as model_file:
-        pickle.dump(model, model_file)
+        pickle.dump(model, model_file, 2)
 
     with open(filename_prefix + ".scaler", "wb") as scaler_file:
-        pickle.dump(scaler, scaler_file)
+        pickle.dump(scaler, scaler_file, 2)
 
     with open(filename_prefix + ".unigrams", "wb") as unigram_file:
-        pickle.dump(unigrams, unigram_file)
+        pickle.dump(unigrams, unigram_file, 2)
 
     with open(filename_prefix + ".desc", "w") as desc_file:
         desc_file.write("Number of points for training: {0}\n".format(model.num_points))

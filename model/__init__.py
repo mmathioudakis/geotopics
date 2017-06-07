@@ -4,7 +4,7 @@ from collections import namedtuple
 
 ModelParameters = namedtuple("ModelParameters",
                              ["num_topics", "num_points", "theta", "phi", "m_arrays", "h_arrays", "beta_arrays",
-                              "topic_centers", "topic_covar"])
+                              "topic_centers", "topic_covar", 'venue_ids'])
 
 Statistics = namedtuple("Statistics",
                         ["likelihood", "user_likelihood", "location_likelihood",
