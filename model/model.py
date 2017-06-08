@@ -450,10 +450,13 @@ class Model:
             sigma_likelihood += np.log(np.linalg.det(topic_covar[z, :, :]))
 
         # Compute phi (i.e. q_d(z)) entropy
-        phi_mul = phi * np.log(phi)
-        nan_idx = np.where(np.isnan(phi_mul))
-        phi_mul[nan_idx] = 0.0  # Since the limit approaches zero as the probability approaches zero
-        phi_entropy = np.sum(phi_mul)
+        phi_entropy = -stats.entropy(phi.ravel())
+        # up to normalization (namely I think the version above is divided by
+        # N), this should be equivalent to the previous version below
+        # phi_mul = phi * np.log(phi)
+        # nan_idx = np.where(np.isnan(phi_mul))
+        # phi_mul[nan_idx] = 0.0  # Since the limit approaches zero as the probability approaches zero
+        # phi_entropy = np.sum(phi_mul)
 
         # TODO: @MM, please check this. - Emre
         h_penalty = 0
